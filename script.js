@@ -348,18 +348,14 @@ async function manejarEnvioFormulario(e) {
 
         console.log('Preparando datos para envío:', datos);
 
-        // Create form data for submission
-        const formData = new FormData();
-        formData.append('data', JSON.stringify({
-            datos: datos
-        }));
-
-        // Create a temporary form and submit it
+        // Create a hidden form for submission
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = GOOGLE_APPS_SCRIPT_URL;
-        form.target = 'hidden-iframe';
+        form.target = '_blank'; // Open in new tab to avoid CORS
+        form.style.display = 'none';
 
+        // Add the data as a hidden input
         const dataInput = document.createElement('input');
         dataInput.type = 'hidden';
         dataInput.name = 'data';
@@ -368,22 +364,18 @@ async function manejarEnvioFormulario(e) {
         });
         form.appendChild(dataInput);
 
-        // Create hidden iframe for response
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden-iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-
-        // Handle response
-        iframe.onload = () => {
-            document.body.removeChild(iframe);
-            document.body.removeChild(form);
-            mostrarMensajeExito();
-        };
-
+        // Add form to body and submit
         document.body.appendChild(form);
         form.submit();
+
+        // Show success message
+        mostrarMensajeExito();
         
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(form);
+        }, 1000);
+
     } catch (error) {
         console.error('Error en el envío:', error);
         alert('Error al enviar el formulario. Por favor intente nuevamente.');
@@ -526,7 +518,7 @@ function validarDocumento(e) {
 
 async function enviarDatosASheets(sheetName, datos) {
   try {
-    const response = await fetch("https://cors-anywhere.herokuapp.com/GOOGLE_APPS_SCRIPT_URL", {
+    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       cache: 'no-cache',
