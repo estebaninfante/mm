@@ -41,19 +41,17 @@ const especialidadesConfig = {
     }
 };
 
-// Replace GOOGLE_APPS_SCRIPT_URL with Supabase config
-const SUPABASE_URL = 'https://pqwgflxtvhndxpkjnjjn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxd2dmbHh0dmhuZHhwa2puampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5NjAxNzQsImV4cCI6MjA1NDUzNjE3NH0.U4o51TxRWI4-K2cdG4t3mr4l5Rh0L2AwhK-7nSyixWU';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Importa la librería de Supabase
+const { createClient } = supabase;
+
+// Conexión con Supabase
+const supabaseUrl = "https://pqwgflxtvhndxpkjnjjn.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxd2dmbHh0dmhuZHhwa2puampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5NjAxNzQsImV4cCI6MjA1NDUzNjE3NH0.U4o51TxRWI4-K2cdG4t3mr4l5Rh0L2AwhK-7nSyixWU";
+
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // Función para inicializar el formulario
 function initForm() {
-    // Remove the departamentos logic since it's handled by lugares.js
-    
-    // Event Listeners
-    document.getElementById('categoria').addEventListener('change', actualizarCamposCategoria);
-    document.getElementById('registroForm').addEventListener('submit', manejarEnvioFormulario);
-    
     // Validación de términos
     const termsInputs = ['termsContact', 'termsPrivacy'].map(id => 
         document.getElementById(id));
@@ -68,6 +66,14 @@ function initForm() {
     // Add document number validation
     const numeroDocumento = document.getElementById('numeroDocumento');
     numeroDocumento.addEventListener('input', validarDocumento);
+
+    // Add event listener for category change
+    const categoriaSelect = document.getElementById('categoria');
+    categoriaSelect.addEventListener('change', actualizarCamposCategoria);
+
+    // Agregar el event listener para el submit del formulario
+    const form = document.getElementById('registroForm');
+    form.addEventListener('submit', manejarEnvioFormulario);
 }
 
 // Fix actualizarCamposCategoria function
@@ -284,11 +290,11 @@ function actualizarExperiencia(categoria) {
             expDiv.innerHTML = `
                 <label for="${key}-exp">${nombre}</label>
                 <input type="number" 
-                       id="${key}-exp" 
-                       min="0" 
-                       max="50" 
-                       required 
-                       placeholder="Años">
+                    id="${key}-exp" 
+                    min="0" 
+                    max="50" 
+                    required 
+                    placeholder="Años">
             `;
             experienciaContainer.appendChild(expDiv);
         });
@@ -321,58 +327,64 @@ async function manejarEnvioFormulario(e) {
     submitBtn.textContent = 'Enviando...';
 
     try {
-        const categoria = document.getElementById('categoria').value;
+        const formData = new FormData(e.target);
+        const categoria = formData.get('categoria');
         
-        // Prepare base data structure
         const datos = {
             rol: categoria,
-            tipo_documento: document.getElementById('tipoDocumento').value,
-            numero_documento: document.getElementById('numeroDocumento').value,
-            nombre: document.getElementById('nombre').value,
-            apellido: document.getElementById('apellido').value,
-            telefono: document.getElementById('telefono').value,
-            telefono_secundario: document.getElementById('telefonoSecundario').value || null,
-            email: document.getElementById('email').value,
-            departamento: document.getElementById('departamento').value,
-            municipio: document.getElementById('municipio').value,
-            certificaciones: document.getElementById('certificaciones')?.value || null,
-            disponibilidad: document.getElementById('disponibilidad').value
+            tipo_documento: formData.get('tipoDocumento'),
+            numero_documento: formData.get('numeroDocumento'),
+            nombre: formData.get('nombre'),
+            apellido: formData.get('apellido'),
+            telefono: formData.get('telefono'),
+            telefono_secundario: formData.get('telefonoSecundario') || null,
+            email: formData.get('email'),
+            departamento: formData.get('departamento'),
+            municipio: formData.get('municipio'),
+            certificaciones: formData.get('certificaciones') || null,
+            disponibilidad: formData.get('disponibilidad'),
+            drywall_superboard: false,
+            drywall_superboard_experiencia: null,
+            pintura_acabados: false,
+            pintura_acabados_experiencia: null,
+            electricidad: false,
+            electricidad_experiencia: null,
+            plomeria: false,
+            plomeria_experiencia: null,
+            carpinteria: false,
+            carpinteria_experiencia: null,
+            enchapado: false,
+            enchapado_experiencia: null,
+            instalacion_cocinas: false,
+            instalacion_cocinas_experiencia: null,
+            instalacion_pisos: false,
+            instalacion_pisos_experiencia: null
         };
 
-        // Add specialties for técnicos/instaladores
+        // Agregar especialidades solo para técnicos e instaladores
         if (categoria === 'tecnico' || categoria === 'instalador') {
             const especialidades = obtenerEspecialidadesDetalladas();
-            const especialidadesFormateadas = {};
-            
-            Object.entries(especialidades).forEach(([key, value]) => {
-                if (key.includes('_Experiencia')) {
-                    const baseKey = key.toLowerCase().replace('_experiencia', '_experiencia');
-                    especialidadesFormateadas[baseKey] = value;
-                } else {
-                    const baseKey = key.toLowerCase();
-                    especialidadesFormateadas[baseKey] = value === 'Sí';
-                }
-            });
-            
-            Object.assign(datos, especialidadesFormateadas);
+            Object.assign(datos, especialidades);
         }
 
-        console.log('Enviando datos a Supabase:', datos);
+        console.log('Datos a enviar:', datos);
 
-        // Insert data into Supabase
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('profesionales')
-            .insert([datos])
-            .select();
+            .insert([datos]);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Error de Supabase:', error);
+            throw new Error(`Error al guardar: ${error.message}`);
+        }
 
-        console.log('Datos guardados:', data);
+        console.log('Datos guardados exitosamente:', data);
         mostrarMensajeExito();
+        e.target.reset();
 
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al enviar el formulario: ' + error.message);
+        console.error('Error en el envío:', error);
+        alert(`Error al enviar el formulario: ${error.message}`);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Unirme al equipo';
@@ -406,14 +418,14 @@ function obtenerEspecialidadesDetalladas() {
     };
 
     const mappings = {
-        'Drywall / Superboard': 'Drywall_Superboard',
-        'Pintura y Acabados': 'Pintura_y_Acabados',
-        'Electricidad': 'Electricidad',
-        'Plomería': 'Plomeria',
-        'Carpintería': 'Carpinteria',
-        'Enchapado': 'Enchapado',
-        'Instalación de Cocinas': 'Instalacion_de_Cocinas',
-        'Instalación de Pisos': 'Instalacion_de_Pisos'
+        'Drywall / Superboard': 'drywall_superboard',
+        'Pintura y Acabados': 'pintura_acabados',
+        'Electricidad': 'electricidad',
+        'Plomería': 'plomeria',
+        'Carpintería': 'carpinteria',
+        'Enchapado': 'enchapado',
+        'Instalación de Cocinas': 'instalacion_cocinas',
+        'Instalación de Pisos': 'instalacion_pisos'
     };
 
     document.querySelectorAll('.especialidad-card').forEach(card => {
@@ -421,19 +433,13 @@ function obtenerEspecialidadesDetalladas() {
         const isSelected = card.classList.contains('selected');
         const experienciaRadio = card.querySelector('input[type="radio"]:checked');
         
-        // Convert to snake_case for PostgreSQL
-        const columnName = nombre
-            .toLowerCase()
-            .replace(/[\/\s]+/g, '_')
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-        
-        especialidades[columnName] = isSelected;
-        
-        if (isSelected && experienciaRadio) {
-            especialidades[`${columnName}_experiencia`] = experienciasTexto[experienciaRadio.value];
-        } else {
-            especialidades[`${columnName}_experiencia`] = null;
+        const columnName = mappings[nombre];
+
+        if (columnName) {
+            especialidades[columnName] = isSelected;
+            especialidades[`${columnName}_experiencia`] = isSelected && experienciaRadio 
+                ? experienciaRadio.nextElementSibling.textContent 
+                : null;
         }
     });
 
@@ -548,21 +554,15 @@ async function enviarDatosASheets(sheetName, datos) {
 }
 
 function mostrarMensajeExito() {
-  const successMessage = document.createElement('div');
-  successMessage.className = 'success-message';
-  successMessage.innerHTML = `
-    <h3>¡Registro Exitoso!</h3>
-    <p>Gracias por registrarte en Manos Maestras.</p>
-    <p>Nos pondremos en contacto contigo pronto.</p>
-    <button onclick="window.location.reload()">Aceptar</button>
-  `;
-  document.body.appendChild(successMessage);
-
-  // Remove message after 5 seconds
-  setTimeout(() => {
-    successMessage.remove();
-    window.location.reload();
-  }, 5000);
+    const successMessage = document.createElement('div');
+    successMessage.className = 'success-message';
+    successMessage.innerHTML = `
+        <h3>¡Registro Exitoso!</h3>
+        <p>Gracias por registrarte en Manos Maestras.</p>
+        <p>Nos pondremos en contacto contigo pronto.</p>
+        <button onclick="this.parentElement.remove()">Aceptar</button>
+    `;
+    document.body.appendChild(successMessage);
 }
 
 function formatDataForSheet(sheetName, datos) {
