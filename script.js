@@ -532,10 +532,8 @@ async function enviarDatosASheets(sheetName, datos) {
   try {
     const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      cache: 'no-cache',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         sheetName: sheetName,
@@ -543,19 +541,21 @@ async function enviarDatosASheets(sheetName, datos) {
       })
     });
 
-    if (response.type === 'opaque') {
-      // This is expected with no-cors mode
+    const resultText = await response.text(); // Primero obtenemos el texto bruto
+
+    try {
+      const result = JSON.parse(resultText); // Intentamos parsear a JSON
+      if (result.status === 'error') {
+        throw new Error(result.message);
+      }
       return true;
+    } catch (error) {
+      console.error('Error al parsear respuesta:', resultText);
+      throw error;
     }
 
-    const result = await response.json();
-    if (result.status === 'error') {
-      throw new Error(result.message);
-    }
-
-    return true;
   } catch (error) {
-    console.error('Error sending data to sheets:', error);
+    console.error('Error enviando datos a Sheets:', error);
     throw error;
   }
 }
