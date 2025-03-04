@@ -1,18 +1,18 @@
 const categoriaConfig = {
     arquitecto: {
         campos: ['arquitecto-siso', 'disponibilidad-section'],
-        required: ['experiencia', 'software', 'certificaciones', 'disponibilidad']
+        required: ['experiencia', 'software', 'disponibilidad']
     },
     siso: {
         campos: ['arquitecto-siso', 'disponibilidad-section'],
-        required: ['experiencia', 'certificaciones', 'disponibilidad']
+        required: ['experiencia', 'disponibilidad']
     },
     tecnico: {
-        campos: ['tecnico-instalador', 'certificaciones-section', 'disponibilidad-section'],
+        campos: ['tecnico-instalador', 'disponibilidad-section'],
         required: ['disponibilidad']
     },
     instalador: {
-        campos: ['tecnico-instalador', 'certificaciones-section', 'disponibilidad-section'],
+        campos: ['tecnico-instalador', 'disponibilidad-section'],
         required: ['disponibilidad']
     }
 };
@@ -341,7 +341,6 @@ async function manejarEnvioFormulario(e) {
             email: formData.get('email'),
             departamento: formData.get('departamento'),
             municipio: formData.get('municipio'),
-            certificaciones: formData.get('certificaciones') || null,
             disponibilidad: formData.get('disponibilidad'),
             drywall_superboard: false,
             drywall_superboard_experiencia: null,
@@ -477,7 +476,6 @@ function getHeaders(sheetName) {
             'Email',
             'Departamento',
             'Municipio',
-            'Certificaciones',
             'Disponibilidad'
         ];
     } else {
@@ -493,7 +491,6 @@ function getHeaders(sheetName) {
             'Email',
             'Departamento',
             'Municipio',
-            'Certificaciones',
             'Disponibilidad',
             'Drywall_Superboard',
             'Drywall_Superboard_Experiencia',
@@ -554,15 +551,40 @@ async function enviarDatosASheets(sheetName, datos) {
 }
 
 function mostrarMensajeExito() {
+    // Crear overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    
+    // Crear mensaje
     const successMessage = document.createElement('div');
     successMessage.className = 'success-message';
     successMessage.innerHTML = `
         <h3>¡Registro Exitoso!</h3>
         <p>Gracias por registrarte en Manos Maestras.</p>
         <p>Nos pondremos en contacto contigo pronto.</p>
-        <button onclick="this.parentElement.remove()">Aceptar</button>
+        <button>Aceptar</button>
     `;
+
+    // Agregar event listener al botón
+    const button = successMessage.querySelector('button');
+    button.addEventListener('click', () => {
+        overlay.remove();
+        successMessage.remove();
+        window.location.reload(); // Recargar el formulario
+    });
+
+    // Agregar al DOM
+    document.body.appendChild(overlay);
     document.body.appendChild(successMessage);
+
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        if (document.body.contains(overlay)) {
+            overlay.remove();
+            successMessage.remove();
+            window.location.reload();
+        }
+    }, 5000);
 }
 
 function formatDataForSheet(sheetName, datos) {
