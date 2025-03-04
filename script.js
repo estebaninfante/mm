@@ -41,8 +41,10 @@ const especialidadesConfig = {
     }
 };
 
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwT_bIbEEymjZQ5bPjbN5OrbxGWPDc2hPzgi1AUPbbDePkAHE1nFMECAdse3vjX5E8A/exec';
+// Replace GOOGLE_APPS_SCRIPT_URL with Supabase config
+const SUPABASE_URL = 'https://pqwgflxtvhndxpkjnjjn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxd2dmbHh0dmhuZHhwa2puampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5NjAxNzQsImV4cCI6MjA1NDUzNjE3NH0.U4o51TxRWI4-K2cdG4t3mr4l5Rh0L2AwhK-7nSyixWU';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Función para inicializar el formulario
 function initForm() {
@@ -310,6 +312,7 @@ function validarTerminos() {
     });
 }
 
+// Update manejarEnvioFormulario function
 async function manejarEnvioFormulario(e) {
     e.preventDefault();
     
@@ -322,52 +325,54 @@ async function manejarEnvioFormulario(e) {
         
         // Prepare base data structure
         const datos = {
-            'Fecha': new Date().toLocaleString('es-CO'),
-            'Rol': categoria,
-            'Tipo Documento': document.getElementById('tipoDocumento').value,
-            'Número Documento': document.getElementById('numeroDocumento').value,
-            'Nombre': document.getElementById('nombre').value,
-            'Apellido': document.getElementById('apellido').value,
-            'Teléfono': document.getElementById('telefono').value,
-            'Teléfono Secundario': document.getElementById('telefonoSecundario').value || 'No especificado',
-            'Email': document.getElementById('email').value,
-            'Departamento': document.getElementById('departamento').value,
-            'Municipio': document.getElementById('municipio').value,
-            'Certificaciones': document.getElementById('certificaciones')?.value || '',
-            'Disponibilidad': document.getElementById('disponibilidad').value
+            rol: categoria,
+            tipo_documento: document.getElementById('tipoDocumento').value,
+            numero_documento: document.getElementById('numeroDocumento').value,
+            nombre: document.getElementById('nombre').value,
+            apellido: document.getElementById('apellido').value,
+            telefono: document.getElementById('telefono').value,
+            telefono_secundario: document.getElementById('telefonoSecundario').value || null,
+            email: document.getElementById('email').value,
+            departamento: document.getElementById('departamento').value,
+            municipio: document.getElementById('municipio').value,
+            certificaciones: document.getElementById('certificaciones')?.value || null,
+            disponibilidad: document.getElementById('disponibilidad').value
         };
 
-        // Add role-specific data
-        if (categoria === 'arquitecto' || categoria === 'siso') {
-            datos['Experiencia'] = document.getElementById('experiencia')?.value || '';
-            datos['Software'] = document.getElementById('software')?.value || '';
-        } else if (categoria === 'tecnico' || categoria === 'instalador') {
-            const especialidadesData = obtenerEspecialidadesDetalladas();
-            Object.assign(datos, especialidadesData);
+        // Add specialties for técnicos/instaladores
+        if (categoria === 'tecnico' || categoria === 'instalador') {
+            const especialidades = obtenerEspecialidadesDetalladas();
+            const especialidadesFormateadas = {};
+            
+            Object.entries(especialidades).forEach(([key, value]) => {
+                if (key.includes('_Experiencia')) {
+                    const baseKey = key.toLowerCase().replace('_experiencia', '_experiencia');
+                    especialidadesFormateadas[baseKey] = value;
+                } else {
+                    const baseKey = key.toLowerCase();
+                    especialidadesFormateadas[baseKey] = value === 'Sí';
+                }
+            });
+            
+            Object.assign(datos, especialidadesFormateadas);
         }
 
-        console.log('Datos a enviar:', datos);
+        console.log('Enviando datos a Supabase:', datos);
 
-        // Create JSON payload
-        const payload = {
-            datos: datos
-        };
+        // Insert data into Supabase
+        const { data, error } = await supabase
+            .from('profesionales')
+            .insert([datos])
+            .select();
 
-        // Send data via fetch
-        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        if (error) throw error;
 
+        console.log('Datos guardados:', data);
         mostrarMensajeExito();
 
     } catch (error) {
-        console.error('Error en el envío:', error);
-        alert('Error al enviar el formulario. Por favor intente nuevamente.');
+        console.error('Error:', error);
+        alert('Error al enviar el formulario: ' + error.message);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Unirme al equipo';
@@ -390,6 +395,7 @@ function prepareDatos(categoria) {
     return datos;
 }
 
+// Update obtenerEspecialidadesDetalladas to return boolean values
 function obtenerEspecialidadesDetalladas() {
     const especialidades = {};
     const experienciasTexto = {
@@ -415,15 +421,19 @@ function obtenerEspecialidadesDetalladas() {
         const isSelected = card.classList.contains('selected');
         const experienciaRadio = card.querySelector('input[type="radio"]:checked');
         
-        const columnName = mappings[nombre];
-        if (!columnName) return;
+        // Convert to snake_case for PostgreSQL
+        const columnName = nombre
+            .toLowerCase()
+            .replace(/[\/\s]+/g, '_')
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
         
-        especialidades[columnName] = isSelected ? 'Sí' : 'No';
+        especialidades[columnName] = isSelected;
         
         if (isSelected && experienciaRadio) {
-            especialidades[`${columnName}_Experiencia`] = experienciasTexto[experienciaRadio.value];
+            especialidades[`${columnName}_experiencia`] = experienciasTexto[experienciaRadio.value];
         } else {
-            especialidades[`${columnName}_Experiencia`] = '';
+            especialidades[`${columnName}_experiencia`] = null;
         }
     });
 
@@ -565,16 +575,6 @@ function formatDataForSheet(sheetName, datos) {
                 formattedData[header] = datos['Tipo Documento'];
                 break;
             case 'Numero_Documento':
-                formattedData[header] = datos['Número Documento'];
-                break;
-            case 'Telefono':
-                formattedData[header] = datos['Teléfono'];
-                break;
-            case 'Telefono_Secundario':
-                formattedData[header] = datos['Teléfono Secundario'];
-                break;
-            default:
-                formattedData[header] = datos[header] || '';
         }
     });
     
