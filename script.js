@@ -324,12 +324,12 @@ async function manejarEnvioFormulario(e) {
         const datos = {
             'Fecha': new Date().toLocaleString('es-CO'),
             'Rol': categoria,
-            'Tipo_Documento': document.getElementById('tipoDocumento').value,
-            'Numero_Documento': document.getElementById('numeroDocumento').value,
+            'Tipo Documento': document.getElementById('tipoDocumento').value,
+            'Número Documento': document.getElementById('numeroDocumento').value,
             'Nombre': document.getElementById('nombre').value,
             'Apellido': document.getElementById('apellido').value,
-            'Telefono': document.getElementById('telefono').value,
-            'Telefono_Secundario': document.getElementById('telefonoSecundario').value || 'No especificado',
+            'Teléfono': document.getElementById('telefono').value,
+            'Teléfono Secundario': document.getElementById('telefonoSecundario').value || 'No especificado',
             'Email': document.getElementById('email').value,
             'Departamento': document.getElementById('departamento').value,
             'Municipio': document.getElementById('municipio').value,
@@ -346,47 +346,24 @@ async function manejarEnvioFormulario(e) {
             Object.assign(datos, especialidadesData);
         }
 
-        // Convert data to URL-encoded format
-        const formData = new URLSearchParams();
-        for (const [key, value] of Object.entries(datos)) {
-            formData.append(key, value);
-        }
+        console.log('Datos a enviar:', datos);
 
-        // Create a hidden iframe for the response
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden-iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
+        // Create JSON payload
+        const payload = {
+            datos: datos
+        };
 
-        // Create the form
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = GOOGLE_APPS_SCRIPT_URL;
-        form.target = 'hidden-iframe';
-        form.style.display = 'none';
+        // Send data via fetch
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-        // Add all data as hidden inputs
-        for (const [key, value] of Object.entries(datos)) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = value;
-            form.appendChild(input);
-        }
-
-        // Add form to body
-        document.body.appendChild(form);
-
-        // Submit form and handle response
-        form.submit();
-
-        // Show success message after a brief delay
-        setTimeout(() => {
-            mostrarMensajeExito();
-            // Clean up
-            document.body.removeChild(form);
-            document.body.removeChild(iframe);
-        }, 2000);
+        mostrarMensajeExito();
 
     } catch (error) {
         console.error('Error en el envío:', error);
