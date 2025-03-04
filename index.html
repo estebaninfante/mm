@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#fa6700">
+    <title>Manos Maestras - Registro de Técnicos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="https://manosmaestras.com">
+            <img src="http://manosmaestras.com/wp-content/uploads/2020/01/logo-manos-maestras.png" alt="Manos Maestras">
+        </a>
+    </nav>
+    <div class="container">
+        <div class="logo-container">
+            <h2>Manos Maestras</h2>
+            <p style="text-align: center; color: #666;">Únete a nuestro equipo de profesionales</p>
+        </div>
+        
+        <form id="registroForm">
+            <div class="title-container">
+                <h1>Únete a Nuestro Equipo de Profesionales</h1>
+                <p class="subtitle">En Manos Maestras buscamos el mejor talento para brindar servicios de calidad</p>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombre">Nombres</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div la="form-group">
+                    <label for="apellido">Apellidos</label>
+                    <input type="text" id="apellido" name="apellido" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tipoDocumento">Tipo de Documento*</label>
+                <select id="tipoDocumento" name="tipoDocumento" required>
+                    <option value="">Seleccione...</option>
+                    <option value="CC">Cédula de Ciudadanía</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="PA">Pasaporte</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="numeroDocumento">Número de Documento*</label>
+                <input type="text" id="numeroDocumento" name="numeroDocumento" required>
+            </div>
+
+            <div class="contact-info">
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefonoSecundario">Teléfono Secundario (Opcional)</label>
+                    <input type="tel" id="telefonoSecundario" name="telefonoSecundario">
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="departamento">Departamento</label>
+                    <select id="departamento" name="departamento" required>
+                        <option value="">Seleccione un departamento...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="municipio">Ciudad/Municipio</label>
+                    <select id="municipio" name="municipio" required>
+                        <option value="">Seleccione primero el departamento...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="categoria">Rol Principal</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Seleccione un rol...</option>
+                    <option value="arquitecto">Arquitecto</option>
+                    <option value="siso">SISO</option>
+                    <option value="tecnico">Técnico</option>
+                    <option value="instalador">Instalador</option>
+                </select>
+            </div>
+
+            <div id="arquitecto-siso" class="categoria-campos hidden">
+                <div class="form-group">
+                    <label for="experiencia">Años de Experiencia</label>
+                    <input type="number" id="experiencia" name="experiencia" min="0" required>
+                </div>
+                <div class="form-group software-group">
+                    <label for="software">Software que maneja</label>
+                    <input type="text" id="software" name="software" placeholder="Ejemplo: AutoCAD, Revit, etc.">
+                </div>
+            </div>
+
+            <div id="tecnico-instalador" class="categoria-campos hidden">
+                <div class="form-group especialidades-section">
+                    <h3>Selecciona tus especialidades</h3>
+                    <div class="especialidades-grid"></div>
+                </div>
+            </div>
+            <div id="certificaciones-section" class="categoria-campos hidden">
+                <div class="form-group">
+                    <label for="certificaciones">Certificaciones</label>
+                    <input 
+                        type="text" 
+                        id="certificaciones" 
+                        name="certificaciones" 
+                        placeholder="Ejemplo: Alturas, PMP, etc."
+                        tabindex="0">
+                </div>
+            </div>
+
+            <div id="disponibilidad-section" class="categoria-campos">
+                <div class="form-group">
+                    <label for="disponibilidad">Disponibilidad</label>
+                    <select id="disponibilidad" name="disponibilidad" required>
+                        <option value="">Seleccione...</option>
+                        <option value="inmediata">Inmediata</option>
+                        <option value="proximo">Próximo mes</option>
+                        <option value="proyectos">Solo por proyectos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="terms-container">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="termsContact" name="termsContact" required>
+                    <label for="termsContact">Autorizo a Manos Maestras para contactarme y gestionar mis datos personales</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="termsPrivacy" name="termsPrivacy" required>
+                    <label for="termsPrivacy">He leído y acepto los <a href="https://manosmaestras.com/privacy-policy/" class="terms-link" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y la <a href="https://manosmaestras.com/privacy-policy/" class="terms-link" target="_blank" rel="noopener noreferrer">Política de Privacidad</a></label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn" disabled>Unirme al equipo</button>
+        </form>
+    </div>
+
+    <script src="lugares.js"></script>
+    <script src="script.js"></script>
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Sobre Nosotros</h3>
+                <p>Manos Maestras es una empresa líder en servicios técnicos y profesionales, comprometida con la excelencia y la calidad en cada proyecto.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <p>Email: servicioalcliente@manosmaestras.com</p>
+                <p>Teléfono: +57 318 351 7432</p>
+            </div>
+            <div class="footer-section">
+                <h3>Enlaces</h3>
+                <p><a href="https://manosmaestras.com">Sitio Web</a></p>
+                <p><a href="https://manosmaestras.com/servicios">Servicios</a></p>
+                <p><a href="https://manosmaestras.com/contacto">Contacto</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
