@@ -324,12 +324,12 @@ async function manejarEnvioFormulario(e) {
         const datos = {
             'Fecha': new Date().toLocaleString('es-CO'),
             'Rol': categoria,
-            'Tipo Documento': document.getElementById('tipoDocumento').value,
-            'Número Documento': document.getElementById('numeroDocumento').value,
+            'Tipo_Documento': document.getElementById('tipoDocumento').value,
+            'Numero_Documento': document.getElementById('numeroDocumento').value,
             'Nombre': document.getElementById('nombre').value,
             'Apellido': document.getElementById('apellido').value,
-            'Teléfono': document.getElementById('telefono').value,
-            'Teléfono Secundario': document.getElementById('telefonoSecundario').value || 'No especificado',
+            'Telefono': document.getElementById('telefono').value,
+            'Telefono_Secundario': document.getElementById('telefonoSecundario').value || 'No especificado',
             'Email': document.getElementById('email').value,
             'Departamento': document.getElementById('departamento').value,
             'Municipio': document.getElementById('municipio').value,
@@ -346,35 +346,47 @@ async function manejarEnvioFormulario(e) {
             Object.assign(datos, especialidadesData);
         }
 
-        console.log('Preparando datos para envío:', datos);
+        // Convert data to URL-encoded format
+        const formData = new URLSearchParams();
+        for (const [key, value] of Object.entries(datos)) {
+            formData.append(key, value);
+        }
 
-        // Create a hidden form for submission
+        // Create a hidden iframe for the response
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden-iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // Create the form
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = GOOGLE_APPS_SCRIPT_URL;
-        form.target = '_blank'; // Open in new tab to avoid CORS
+        form.target = 'hidden-iframe';
         form.style.display = 'none';
 
-        // Add the data as a hidden input
-        const dataInput = document.createElement('input');
-        dataInput.type = 'hidden';
-        dataInput.name = 'data';
-        dataInput.value = JSON.stringify({
-            datos: datos
-        });
-        form.appendChild(dataInput);
+        // Add all data as hidden inputs
+        for (const [key, value] of Object.entries(datos)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+        }
 
-        // Add form to body and submit
+        // Add form to body
         document.body.appendChild(form);
+
+        // Submit form and handle response
         form.submit();
 
-        // Show success message
-        mostrarMensajeExito();
-        
-        // Clean up
+        // Show success message after a brief delay
         setTimeout(() => {
+            mostrarMensajeExito();
+            // Clean up
             document.body.removeChild(form);
-        }, 1000);
+            document.body.removeChild(iframe);
+        }, 2000);
 
     } catch (error) {
         console.error('Error en el envío:', error);
