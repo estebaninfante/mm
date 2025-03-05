@@ -41,15 +41,6 @@ const especialidadesConfig = {
     }
 };
 
-// Importa la librería de Supabase
-const { createClient } = supabase;
-
-// Conexión con Supabase
-const supabaseUrl = "https://pqwgflxtvhndxpkjnjjn.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxd2dmbHh0dmhuZHhwa2puampuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5NjAxNzQsImV4cCI6MjA1NDUzNjE3NH0.U4o51TxRWI4-K2cdG4t3mr4l5Rh0L2AwhK-7nSyixWU";
-
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
 // Función para inicializar el formulario
 function initForm() {
     // Validación de términos
@@ -327,63 +318,76 @@ async function manejarEnvioFormulario(e) {
     submitBtn.textContent = 'Enviando...';
 
     try {
-        const formData = new FormData(e.target);
-        const categoria = formData.get('categoria');
+        const categoria = document.getElementById('categoria').value;
         
-        const datos = {
+        // Determine the correct API endpoint based on role
+        const endpoint = (categoria === 'arquitecto' || categoria === 'siso')
+            ? "arquitectos-siso"
+            : "profesionales";  // Cambiado de "tecnicos" a "profesionales"
+        
+        const apiUrl = `https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev/api/${endpoint}`;
+        
+        // Prepare base data (removed created_at field)
+        const datosBase = {
             rol: categoria,
-            tipo_documento: formData.get('tipoDocumento'),
-            numero_documento: formData.get('numeroDocumento'),
-            nombre: formData.get('nombre'),
-            apellido: formData.get('apellido'),
-            telefono: formData.get('telefono'),
-            telefono_secundario: formData.get('telefonoSecundario') || null,
-            email: formData.get('email'),
-            departamento: formData.get('departamento'),
-            municipio: formData.get('municipio'),
-            disponibilidad: formData.get('disponibilidad'),
-            drywall_superboard: false,
-            drywall_superboard_experiencia: null,
-            pintura_acabados: false,
-            pintura_acabados_experiencia: null,
-            electricidad: false,
-            electricidad_experiencia: null,
-            plomeria: false,
-            plomeria_experiencia: null,
-            carpinteria: false,
-            carpinteria_experiencia: null,
-            enchapado: false,
-            enchapado_experiencia: null,
-            instalacion_cocinas: false,
-            instalacion_cocinas_experiencia: null,
-            instalacion_pisos: false,
-            instalacion_pisos_experiencia: null
+            tipo_documento: document.getElementById('tipoDocumento').value,
+            numero_documento: document.getElementById('numeroDocumento').value,
+            nombre: document.getElementById('nombre').value,
+            apellido: document.getElementById('apellido').value,
+            telefono: document.getElementById('telefono').value,
+            telefono_secundario: document.getElementById('telefonoSecundario').value || null,
+            email: document.getElementById('email').value,
+            departamento: document.getElementById('departamento').value,
+            municipio: document.getElementById('municipio').value,
+            disponibilidad: document.getElementById('disponibilidad').value
         };
 
-        // Agregar especialidades solo para técnicos e instaladores
-        if (categoria === 'tecnico' || categoria === 'instalador') {
-            const especialidades = obtenerEspecialidadesDetalladas();
-            Object.assign(datos, especialidades);
+        // Add role-specific data
+        if (categoria === 'arquitecto' || categoria === 'siso') {
+            Object.assign(datosBase, {
+                experiencia: document.getElementById('experiencia').value,
+                software: categoria === 'arquitecto' ? document.getElementById('software').value : null,
+            });
+        } else {
+            // For técnicos e instaladores, add specialties
+            Object.assign(datosBase, obtenerEspecialidadesDetalladas());
         }
 
-        console.log('Datos a enviar:', datos);
+        console.log(`Enviando datos a: ${apiUrl}`);
+        console.log('Datos a enviar:', JSON.stringify(datosBase, null, 2));
 
-        const { data, error } = await supabaseClient
-            .from('profesionales')
-            .insert([datos]);
+        // Send data to Worker
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(datosBase)
+        });
 
-        if (error) {
-            console.error('Error de Supabase:', error);
-            throw new Error(`Error al guardar: ${error.message}`);
+        // Log the response status and headers
+        console.log('Response status:', response.status);
+        console.log('Response headers:', [...response.headers.entries()]);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
         }
 
-        console.log('Datos guardados exitosamente:', data);
+        const resultado = await response.json();
+        console.log('Respuesta del Worker:', resultado);
+        
+        if (resultado.error) {
+            throw new Error(resultado.error);
+        }
+
         mostrarMensajeExito();
-        e.target.reset();
 
     } catch (error) {
-        console.error('Error en el envío:', error);
-        alert(`Error al enviar el formulario: ${error.message}`);
+        console.error('Error detallado:', error);
+        alert('Error al enviar el formulario: ' + error.message);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Unirme al equipo';
