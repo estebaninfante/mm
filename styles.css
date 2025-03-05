@@ -19,7 +19,7 @@ body {
   padding: 2rem 1rem;
   margin-top: -1rem; /* Reduced from -2rem to -1rem */
   position: relative;
-  background: url('fondoformulario.webp') center/cover no-repeat fixed;
+  background: url('assets/fondoformulario.webp') center/cover no-repeat fixed;
 }
 
 .container::before {
