@@ -132,6 +132,15 @@ function initForm() {
     // Agregar el event listener para el submit del formulario
     const form = document.getElementById('registroForm');
     form.addEventListener('submit', manejarEnvioFormulario);
+
+    // Agregar validación en tiempo real
+    document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
+        if (!validarEdad(e.target.value)) {
+            e.target.setCustomValidity('Debes ser mayor de edad para registrarte');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
 }
 
 // Fix actualizarCamposCategoria function
@@ -380,6 +389,12 @@ function validarTerminos() {
 async function manejarEnvioFormulario(e) {
     e.preventDefault();
     
+    const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+    if (!validarEdad(fechaNacimiento)) {
+        alert('Debes ser mayor de edad para registrarte');
+        return;
+    }
+
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
@@ -676,3 +691,67 @@ function formatDataForSheet(sheetName, datos) {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', initForm);
+
+const validaciones = {
+  // Reglas para la tabla "profesionales"
+  profesionales: {
+    // Campos obligatorios que deben estar presentes
+    required: [
+      'nombre', 
+      'apellido', 
+      'tipoDocumento', 
+      'numeroDocumento',
+      'telefono',
+      'email',
+      'departamento',
+      'municipio',
+      'categoria'
+    ],
+    // Patrones de expresiones regulares para validar el formato
+    patterns: {
+      nombre: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,  // Solo letras, espacios y tildes, 2-50 caracteres
+      apellido: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/, // Solo letras, espacios y tildes, 2-50 caracteres
+      numeroDocumento: /^\d{6,12}$/,               // Solo números, 6-12 dígitos
+      telefono: /^[0-9]{10}$/,                     // Solo números, exactamente 10 dígitos
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/         // Formato básico de email
+    }
+  },
+  
+  // Reglas para la tabla "arquitectos_siso"
+  arquitectos_siso: {
+    required: [
+      'nombre',
+      'apellido',
+      'tipoDocumento',
+      'numeroDocumento',
+      'telefono',
+      'email',
+      'departamento',
+      'municipio',
+      'experiencia',
+      'software'
+    ],
+    patterns: {
+      // Las mismas validaciones de formato que profesionales
+      nombre: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,
+      apellido: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/,
+      numeroDocumento: /^\d{6,12}$/,
+      telefono: /^[0-9]{10}$/,
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      experiencia: /^\d{1,2}$/                     // Solo números, 1-2 dígitos (0-99 años)
+    }
+  }
+};
+
+function validarEdad(fechaNacimiento) {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+    
+    return edad >= 18;
+}

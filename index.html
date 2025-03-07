@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#fa6700">
-    <title>Manos Maestras - Registro de Técnicos</title>
+    <title>Manos Maestras - ¡Únete a nuestro equipo!</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
@@ -31,14 +31,31 @@
                     <label for="nombre">Nombres</label>
                     <input type="text" id="nombre" name="nombre" required>
                 </div>
-                <div la="form-group">
+                <div class="form-group">
                     <label for="apellido">Apellidos</label>
                     <input type="text" id="apellido" name="apellido" required>
                 </div>
             </div>
 
+            <!-- Nuevos campos -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                </div>
+                <div class="form-group">
+                    <label for="genero">Género*</label>
+                    <select id="genero" name="genero" required>
+                        <option value="">Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
-                <label for="tipoDocumento">Tipo de Documento*</label>
+                <label for="tipoDocumento">Tipo de Documento</label>
                 <select id="tipoDocumento" name="tipoDocumento" required>
                     <option value="">Seleccione...</option>
                     <option value="CC">Cédula de Ciudadanía</option>
@@ -48,7 +65,7 @@
             </div>
 
             <div class="form-group">
-                <label for="numeroDocumento">Número de Documento*</label>
+                <label for="numeroDocumento">Número de Documento</label>
                 <input type="text" id="numeroDocumento" name="numeroDocumento" required>
             </div>
 

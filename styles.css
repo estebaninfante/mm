@@ -865,3 +865,41 @@ input::placeholder {
 .form-group input:required {
     border-left: 3px solid var(--primary-color);
 }
+
+/* Estilos para fecha y género */
+input[type="date"],
+select#genero {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+input[type="date"]:focus,
+select#genero:focus {
+    border-color: #fa6700;
+    outline: none;
+}
+
+/* Indicador de campo requerido */
+label[for="fechaNacimiento"]::after,
+label[for="genero"]::after,
+label[for="nombre"]::after,
+label[for="apellido"]::after,
+label[for="telefono"]::after,
+label[for="email"]::after,
+label[for="departamento"]::after,
+label[for="municipio"]::after {
+    content: "*";
+    color: #fa6700;
+    margin-left: 4px;
+}
+
+/* Agregar borde izquierdo para campos requeridos */
+.form-group select:required,
+.form-group input:required,
+#departamento:required,
+#municipio:required {
+    border-left: 3px solid var(--primary-color);
+}
