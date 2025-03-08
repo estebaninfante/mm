@@ -14,6 +14,14 @@ const categoriaConfig = {
     instalador: {
         campos: ['tecnico-instalador', 'disponibilidad-section'],
         required: ['disponibilidad']
+    },
+    ayudante: {
+        campos: ['disponibilidad-section'],
+        required: ['disponibilidad']
+    },
+    aseador: {
+        campos: ['disponibilidad-section'],
+        required: ['disponibilidad']
     }
 };
 
@@ -101,10 +109,40 @@ function actualizarMunicipios() {
     }
 }
 
-// Función para inicializar el formulario
+// Función para inicializar la selección de roles
+function initRoleSelection() {
+    const roleCards = document.querySelectorAll('.role-card');
+    const hiddenInput = document.getElementById('categoria');
+    
+    roleCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Eliminar clase selected de todas las tarjetas
+            roleCards.forEach(c => c.classList.remove('selected'));
+            
+            // Añadir clase selected a la tarjeta clickeada
+            this.classList.add('selected');
+            
+            // Actualizar el valor del input oculto
+            const roleValue = this.dataset.role;
+            hiddenInput.value = roleValue;
+            
+            // Disparar evento change para actualizar el formulario
+            const event = new Event('change');
+            hiddenInput.dispatchEvent(event);
+            
+            // Actualizar campos basados en la categoría
+            actualizarCamposCategoria();
+        });
+    });
+}
+
+// Actualizar initForm para incluir la inicialización de roles
 function initForm() {
     // Cargar departamentos y ciudades
     cargarDepartamentosYCiudades();
+    
+    // Inicializar selección de roles
+    initRoleSelection();
     
     // Escuchar cambios en el select de departamento
     const depSelect = document.getElementById('departamento');
@@ -125,10 +163,6 @@ function initForm() {
     const numeroDocumento = document.getElementById('numeroDocumento');
     numeroDocumento.addEventListener('input', validarDocumento);
 
-    // Add event listener for category change
-    const categoriaSelect = document.getElementById('categoria');
-    categoriaSelect.addEventListener('change', actualizarCamposCategoria);
-
     // Agregar el event listener para el submit del formulario
     const form = document.getElementById('registroForm');
     form.addEventListener('submit', manejarEnvioFormulario);
@@ -143,7 +177,7 @@ function initForm() {
     });
 }
 
-// Fix actualizarCamposCategoria function
+// Modificar la función actualizarCamposCategoria para trabajar con el input oculto
 function actualizarCamposCategoria() {
     const categoria = document.getElementById('categoria').value;
     
@@ -405,11 +439,11 @@ async function manejarEnvioFormulario(e) {
         // Determine the correct API endpoint based on role
         const endpoint = (categoria === 'arquitecto' || categoria === 'siso')
             ? "arquitectos-siso"
-            : "profesionales";  // Cambiado de "tecnicos" a "profesionales"
+            : "profesionales";  // Todos los demás roles van a este endpoint
         
         const apiUrl = `https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev/api/${endpoint}`;
         
-        // Prepare base data (removed created_at field)
+        // Prepare base data
         const datosBase = {
             rol: categoria,
             tipo_documento: document.getElementById('tipoDocumento').value,
@@ -430,10 +464,11 @@ async function manejarEnvioFormulario(e) {
                 experiencia: document.getElementById('experiencia').value,
                 software: categoria === 'arquitecto' ? document.getElementById('software').value : null,
             });
-        } else {
-            // For técnicos e instaladores, add specialties
+        } else if (categoria === 'tecnico' || categoria === 'instalador') {
+            // Para técnicos e instaladores, añadir especialidades
             Object.assign(datosBase, obtenerEspecialidadesDetalladas());
         }
+        // Los nuevos roles (ayudante y aseador) no requieren datos adicionales
 
         console.log(`Enviando datos a: ${apiUrl}`);
         console.log('Datos a enviar:', JSON.stringify(datosBase, null, 2));

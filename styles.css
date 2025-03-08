@@ -903,3 +903,88 @@ label[for="municipio"]::after {
 #municipio:required {
     border-left: 3px solid var(--primary-color);
 }
+
+/* Estilos para la selección de roles */
+.roles-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+    width: 100%;
+}
+
+.role-card {
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    border-color: #ccc;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.role-card.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(250, 103, 0, 0.05);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(250, 103, 0, 0.15);
+}
+
+.role-card.selected::before {
+    content: '✓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: var(--primary-color);
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.role-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.role-card h4 {
+    margin: 0.5rem 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.role-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0;
+    line-height: 1.4;
+}
+
+/* Ajustes responsive */
+@media (max-width: 768px) {
+    .roles-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .roles-container {
+        grid-template-columns: 1fr;
+    }
+}

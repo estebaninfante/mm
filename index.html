@@ -100,14 +100,41 @@
             </div>
 
             <div class="form-group">
-                <label for="categoria">Rol Principal</label>
-                <select id="categoria" name="categoria" required>
-                    <option value="">Seleccione un rol...</option>
-                    <option value="arquitecto">Arquitecto</option>
-                    <option value="siso">SISO</option>
-                    <option value="tecnico">Técnico</option>
-                    <option value="instalador">Instalador</option>
-                </select>
+                <label>Rol Principal</label>
+                <div class="roles-container">
+                    <div class="role-card" data-role="arquitecto">
+                        <div class="role-icon">🏗️</div>
+                        <h4>Arquitecto</h4>
+                        <p>Diseña y supervisa proyectos de construcción y remodelación.</p>
+                    </div>
+                    <div class="role-card" data-role="siso">
+                        <div class="role-icon">👷</div>
+                        <h4>SISO</h4>
+                        <p>Garantiza la seguridad industrial y salud ocupacional en obra.</p>
+                    </div>
+                    <div class="role-card" data-role="tecnico">
+                        <div class="role-icon">🔧</div>
+                        <h4>Técnico</h4>
+                        <p>Realiza trabajos técnicos especializados en diferentes áreas.</p>
+                    </div>
+                    <div class="role-card" data-role="instalador">
+                        <div class="role-icon">🔌</div>
+                        <h4>Instalador</h4>
+                        <p>Especialista en instalación de equipos y sistemas.</p>
+                    </div>
+                    <div class="role-card" data-role="ayudante">
+                        <div class="role-icon">🧰</div>
+                        <h4>Ayudante de obra</h4>
+                        <p>Apoya en diversas tareas del proceso constructivo.</p>
+                    </div>
+                    <div class="role-card" data-role="aseador">
+                        <div class="role-icon">🧹</div>
+                        <h4>Aseador de obra</h4>
+                        <p>Mantiene la limpieza y organización del espacio de trabajo.</p>
+                    </div>
+                </div>
+                <!-- Input oculto para almacenar el valor seleccionado -->
+                <input type="hidden" id="categoria" name="categoria" required>
             </div>
 
             <div id="arquitecto-siso" class="categoria-campos hidden">
