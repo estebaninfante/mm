@@ -243,7 +243,7 @@ input::placeholder {
 }
 
 .especialidad-card {
-  background: rgba(255, 255, 255, 0.75); /* More transparent background */
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -262,7 +262,8 @@ input::placeholder {
   padding: 1rem 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.75); /* More transparent background */
+  background: rgba(255, 255, 255, 0.75);
+  height: 60px;
 }
 
 .especialidad-header input[type="checkbox"] {
@@ -291,8 +292,17 @@ input::placeholder {
 }
 
 .especialidad-card.selected {
+  grid-column: 1 / -1;
   border-color: var(--primary-color);
   background-color: rgba(250, 103, 0, 0.05);
+  order: -1;
+  margin-bottom: 1rem;
+}
+
+.especialidad-card.selected .especialidad-content {
+  max-height: 300px;
+  opacity: 1;
+  padding: 1rem;
 }
 
 .especialidad-card.selected .especialidad-header {
@@ -306,12 +316,6 @@ input::placeholder {
 
 .especialidad-card.selected .especialidad-icon {
   color: white;
-}
-
-.especialidad-card.selected .especialidad-content {
-  max-height: 300px;
-  opacity: 1;
-  padding: 1rem;
 }
 
 .experiencia-input-group {
@@ -830,6 +834,12 @@ input::placeholder {
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
     }
+
+    .especialidad-card.selected .especialidad-content {
+        position: relative;
+        top: 0;
+        box-shadow: none;
+    }
 }
 
 /* Additional improvements for very small screens */
@@ -923,9 +933,6 @@ label[for="municipio"]::after {
     text-align: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 .role-card:hover {
@@ -987,4 +994,242 @@ label[for="municipio"]::after {
     .roles-container {
         grid-template-columns: 1fr;
     }
+}
+
+/* Estilos para la selección de género */
+.gender-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.gender-card {
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.gender-card:hover {
+    transform: translateY(-3px);
+    border-color: #ccc;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.gender-card.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(250, 103, 0, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(250, 103, 0, 0.15);
+}
+
+.gender-card.selected::before {
+    content: '✓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: var(--primary-color);
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.gender-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.gender-card h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+/* Ajustes responsive */
+@media (max-width: 480px) {
+    .gender-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilos para el diálogo de confirmación */
+.confirmation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.confirmation-dialog.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirmation-content {
+    background-color: white;
+    border-radius: 10px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.confirmation-dialog.active .confirmation-content {
+    transform: translateY(0);
+}
+
+.confirmation-content h4 {
+    color: #333;
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.confirmation-content p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #d0d0d0;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Estilos para mejorar el campo de fecha de nacimiento */
+input[type="date"] {
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fa6700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    width: 40px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
+@supports (-webkit-appearance: none) {
+    input[type="date"]::before {
+        content: attr(placeholder);
+        position: absolute;
+        color: #999;
+        width: calc(100% - 40px);
+        top: 50%;
+        transform: translateY(-50%);
+        left: 12px;
+        pointer-events: none;
+    }
+    
+    input[type="date"]:focus::before,
+    input[type="date"]:valid::before {
+        display: none;
+    }
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+/* Ajustes para la fila de fecha y género */
+.form-row.fecha-genero {
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.form-row.fecha-genero .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row.fecha-genero .form-group:first-child {
+    flex-basis: 35%;
+}
+
+.form-row.fecha-genero .form-group:last-child {
+    flex-basis: 65%;
+}
+
+/* Ajustes específicos para pantallas grandes */
+@media (min-width: 768px) {
+    .form-row.fecha-genero {
+        height: auto;
+        align-items: flex-start;
+    }
+    
+    .form-row.fecha-genero .form-group label {
+        margin-bottom: 1rem;
+    }
+    
+    .form-row.fecha-genero input[type="date"] {
+        height: 55px;
+        margin-top: 7px;
+    }
+}
+
+/* Mejoras visuales para la consistencia */
+.gender-container {
+    margin-top: 0.5rem;
 }

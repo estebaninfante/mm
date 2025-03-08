@@ -136,13 +136,108 @@ function initRoleSelection() {
     });
 }
 
-// Actualizar initForm para incluir la inicialización de roles
+// Función para inicializar la selección de género
+function initGenderSelection() {
+    const genderCards = document.querySelectorAll('.gender-card');
+    const hiddenInput = document.getElementById('genero');
+    
+    genderCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Eliminar clase selected de todas las tarjetas
+            genderCards.forEach(c => c.classList.remove('selected'));
+            
+            // Añadir clase selected a la tarjeta clickeada
+            this.classList.add('selected');
+            
+            // Actualizar el valor del input oculto
+            const genderValue = this.dataset.gender;
+            hiddenInput.value = genderValue;
+            
+            // Disparar evento change para validación
+            const event = new Event('change');
+            hiddenInput.dispatchEvent(event);
+        });
+    });
+}
+
+// Variables para manejar la confirmación
+let currentCardToDeselect = null;
+
+// Inicializar el diálogo de confirmación
+function initConfirmationDialog() {
+    const dialog = document.getElementById('confirmation-dialog');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    const confirmBtn = document.getElementById('confirm-yes');
+    
+    // Manejador para el botón de cancelar
+    cancelBtn.addEventListener('click', () => {
+        hideConfirmationDialog();
+        currentCardToDeselect = null;
+    });
+    
+    // Manejador para el botón de confirmar
+    confirmBtn.addEventListener('click', () => {
+        if (currentCardToDeselect) {
+            // Deseleccionar la tarjeta
+            currentCardToDeselect.classList.remove('selected');
+            currentCardToDeselect.querySelector('.especialidad-icon').textContent = '+';
+            
+            // Deseleccionar los radios
+            const radios = currentCardToDeselect.querySelectorAll('input[type="radio"]:checked');
+            radios.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Actualizar resumen
+            actualizarResumenEspecialidades();
+            
+            // Limpiar referencia
+            currentCardToDeselect = null;
+        }
+        hideConfirmationDialog();
+    });
+}
+
+// Mostrar el diálogo de confirmación
+function showConfirmationDialog(cardToDeselect, especialidadNombre) {
+    const dialog = document.getElementById('confirmation-dialog');
+    const message = dialog.querySelector('p');
+    
+    // Actualizar mensaje con el nombre de la especialidad
+    message.textContent = `¿Realmente deseas quitar la especialidad "${especialidadNombre}"?`;
+    
+    // Guardar referencia a la tarjeta
+    currentCardToDeselect = cardToDeselect;
+    
+    // Mostrar diálogo
+    dialog.classList.remove('hidden');
+    dialog.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
+}
+
+// Ocultar el diálogo de confirmación
+function hideConfirmationDialog() {
+    const dialog = document.getElementById('confirmation-dialog');
+    dialog.classList.remove('active');
+    setTimeout(() => {
+        dialog.classList.add('hidden');
+    }, 300);
+    document.body.style.overflow = ''; // Restaurar scroll
+}
+
+// Actualizar initForm para incluir la inicialización de roles y género
 function initForm() {
     // Cargar departamentos y ciudades
     cargarDepartamentosYCiudades();
     
     // Inicializar selección de roles
     initRoleSelection();
+    
+    // Inicializar selección de género
+    initGenderSelection();
+    
+    // Inicializar diálogo de confirmación
+    initConfirmationDialog();
     
     // Escuchar cambios en el select de departamento
     const depSelect = document.getElementById('departamento');
@@ -286,17 +381,25 @@ function mostrarEspecialidades(categoria) {
         `;
         container.appendChild(card);
 
-        // Event listener for header click
+        // Event listener para header click con confirmación
         const header = card.querySelector('.especialidad-header');
         header.addEventListener('click', (e) => {
             const card = e.target.closest('.especialidad-card');
-            card.classList.toggle('selected');
-            card.querySelector('.especialidad-icon').textContent = 
-                card.classList.contains('selected') ? '−' : '+';
-            actualizarResumenEspecialidades();
+            const isSelected = card.classList.contains('selected');
+            const especialidadNombre = card.querySelector('.especialidad-nombre').textContent;
+            
+            if (isSelected) {
+                // Si está seleccionada, mostrar confirmación antes de deseleccionar
+                showConfirmationDialog(card, especialidadNombre);
+            } else {
+                // Si no está seleccionada, simplemente seleccionarla
+                card.classList.add('selected');
+                card.querySelector('.especialidad-icon').textContent = '−';
+                actualizarResumenEspecialidades();
+            }
         });
 
-        // Event listeners for radio buttons and labels
+        // Event listeners para radio buttons y labels
         card.querySelectorAll('.experiencia-option').forEach(option => {
             option.addEventListener('click', (e) => {
                 e.stopPropagation();

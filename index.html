@@ -38,19 +38,27 @@
             </div>
 
             <!-- Nuevos campos -->
-            <div class="form-row">
+            <div class="form-row fecha-genero">
                 <div class="form-group">
                     <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" required 
+                           placeholder="dd/mm/aaaa" min="1940-01-01" max="2006-01-01">
                 </div>
                 <div class="form-group">
-                    <label for="genero">Género*</label>
-                    <select id="genero" name="genero" required>
-                        <option value="">Seleccione...</option>
-                        <option value="masculino">Masculino</option>
-                        <option value="femenino">Femenino</option>
-                        <option value="otro">Otro</option>
-                    </select>
+                    <label for="genero">Género</label>
+                    <div class="gender-container">
+                        <div class="gender-card" data-gender="masculino">
+                            <h4>Masculino</h4>
+                        </div>
+                        <div class="gender-card" data-gender="femenino">
+                            <h4>Femenino</h4>
+                        </div>
+                        <div class="gender-card" data-gender="otro">
+                            <h4>Otro</h4>
+                        </div>
+                    </div>
+                    <!-- Input oculto para almacenar el valor seleccionado -->
+                    <input type="hidden" id="genero" name="genero" required>
                 </div>
             </div>
 
@@ -103,32 +111,26 @@
                 <label>Rol Principal</label>
                 <div class="roles-container">
                     <div class="role-card" data-role="arquitecto">
-                        <div class="role-icon">🏗️</div>
                         <h4>Arquitecto</h4>
                         <p>Diseña y supervisa proyectos de construcción y remodelación.</p>
                     </div>
                     <div class="role-card" data-role="siso">
-                        <div class="role-icon">👷</div>
                         <h4>SISO</h4>
                         <p>Garantiza la seguridad industrial y salud ocupacional en obra.</p>
                     </div>
                     <div class="role-card" data-role="tecnico">
-                        <div class="role-icon">🔧</div>
                         <h4>Técnico</h4>
                         <p>Realiza trabajos técnicos especializados en diferentes áreas.</p>
                     </div>
                     <div class="role-card" data-role="instalador">
-                        <div class="role-icon">🔌</div>
                         <h4>Instalador</h4>
                         <p>Especialista en instalación de equipos y sistemas.</p>
                     </div>
                     <div class="role-card" data-role="ayudante">
-                        <div class="role-icon">🧰</div>
                         <h4>Ayudante de obra</h4>
                         <p>Apoya en diversas tareas del proceso constructivo.</p>
                     </div>
                     <div class="role-card" data-role="aseador">
-                        <div class="role-icon">🧹</div>
                         <h4>Aseador de obra</h4>
                         <p>Mantiene la limpieza y organización del espacio de trabajo.</p>
                     </div>
@@ -200,5 +202,16 @@
             </div>
         </div>
     </footer>
+    <!-- Diálogo de confirmación -->
+    <div id="confirmation-dialog" class="confirmation-dialog hidden">
+        <div class="confirmation-content">
+            <h4>¿Estás seguro?</h4>
+            <p>¿Realmente deseas quitar esta especialidad?</p>
+            <div class="confirmation-buttons">
+                <button type="button" id="confirm-cancel" class="btn-secondary">Cancelar</button>
+                <button type="button" id="confirm-yes" class="btn-primary">Sí, quitar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
