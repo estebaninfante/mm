@@ -153,9 +153,8 @@ function initGenderSelection() {
             const genderValue = this.dataset.gender;
             hiddenInput.value = genderValue;
             
-            // Disparar evento change para validación
-            const event = new Event('change');
-            hiddenInput.dispatchEvent(event);
+            // Verificar que el valor se haya establecido
+            console.log('Género seleccionado:', hiddenInput.value);
         });
     });
 }
@@ -254,9 +253,65 @@ function initForm() {
     // Initial update of fields
     actualizarCamposCategoria();
 
-    // Add document number validation
+    // Agregar validación para número de documento
     const numeroDocumento = document.getElementById('numeroDocumento');
-    numeroDocumento.addEventListener('input', validarDocumento);
+    numeroDocumento.addEventListener('input', function(e) {
+        // Eliminar cualquier caracter que no sea número
+        let valor = e.target.value.replace(/\D/g, '');
+        
+        // Limitar a 12 dígitos
+        valor = valor.substring(0, 12);
+        
+        // Actualizar el valor del campo
+        e.target.value = valor;
+        
+        // Validar longitud mínima
+        if (valor.length < 6) {
+            e.target.setCustomValidity('El número de documento debe tener entre 6 y 12 dígitos');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+
+    // Agregar validación para teléfono
+    const telefono = document.getElementById('telefono');
+    telefono.addEventListener('input', function(e) {
+        // Eliminar cualquier caracter que no sea número
+        let valor = e.target.value.replace(/\D/g, '');
+        
+        // Limitar a 10 dígitos
+        valor = valor.substring(0, 10);
+        
+        // Actualizar el valor del campo
+        e.target.value = valor;
+        
+        // Validar longitud
+        if (valor.length !== 10) {
+            e.target.setCustomValidity('El teléfono debe tener exactamente 10 dígitos');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+
+    // Agregar validación para teléfono secundario (opcional)
+    const telefonoSecundario = document.getElementById('telefonoSecundario');
+    telefonoSecundario.addEventListener('input', function(e) {
+        // Eliminar cualquier caracter que no sea número
+        let valor = e.target.value.replace(/\D/g, '');
+        
+        // Limitar a 10 dígitos
+        valor = valor.substring(0, 10);
+        
+        // Actualizar el valor del campo
+        e.target.value = valor;
+        
+        // Validar longitud solo si hay algún valor
+        if (valor.length > 0 && valor.length !== 10) {
+            e.target.setCustomValidity('El teléfono debe tener exactamente 10 dígitos');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
 
     // Agregar el event listener para el submit del formulario
     const form = document.getElementById('registroForm');
@@ -526,20 +581,32 @@ function validarTerminos() {
 async function manejarEnvioFormulario(e) {
     e.preventDefault();
     
+    // Obtener todos los valores necesarios
     const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-    if (!validarEdad(fechaNacimiento)) {
-        alert('Debes ser mayor de edad para registrarte');
+    const genero = document.getElementById('genero').value;
+    const categoria = document.getElementById('categoria').value;
+
+    // Validaciones iniciales con mensajes más claros
+    if (!fechaNacimiento) {
+        alert('Por favor selecciona tu fecha de nacimiento');
         return;
     }
 
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
+    if (!genero) {
+        alert('Por favor selecciona tu género');
+        document.querySelector('.gender-container').scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
+
+    // Log de verificación
+    console.log('Valores antes de enviar:', {
+        fechaNacimiento,
+        genero,
+        categoria
+    });
 
     try {
-        const categoria = document.getElementById('categoria').value;
-        
-        // Preparar datos base
+        // Preparar datos base con los nombres de campos correctos
         const datosBase = {
             rol: categoria,
             tipo_documento: document.getElementById('tipoDocumento').value,
@@ -552,9 +619,13 @@ async function manejarEnvioFormulario(e) {
             departamento: document.getElementById('departamento').value,
             municipio: document.getElementById('municipio').value,
             disponibilidad: document.getElementById('disponibilidad').value,
-            fechanacimiento: document.getElementById('fechaNacimiento').value, // Cambiado a fechanacimiento
-            genero: document.getElementById('genero').value
+            fechanacimiento: fechaNacimiento, // Asegurarse de que este campo se envíe
+            genero: genero, // Asegurarse de que este campo se envíe
+            fecha: new Date().toISOString()
         };
+
+        // Log de verificación de los datos base
+        console.log('Datos base a enviar:', datosBase);
 
         // Añadir datos específicos según el rol
         if (categoria === 'arquitecto' || categoria === 'siso') {
@@ -563,42 +634,33 @@ async function manejarEnvioFormulario(e) {
                 software: categoria === 'arquitecto' ? document.getElementById('software').value : null
             });
         } else if (categoria === 'tecnico' || categoria === 'instalador') {
-            // Para técnicos e instaladores, añadir especialidades con el formato correcto
             const especialidades = obtenerEspecialidadesDetalladas();
             Object.assign(datosBase, especialidades);
         }
 
-        // Determinar el endpoint según el rol
-        const endpoint = (categoria === 'tecnico' || categoria === 'instalador') 
-            ? 'profesionales' 
-            : 'otros_profesionales';
+        // Log final de todos los datos
+        console.log('Datos completos a enviar:', datosBase);
 
-        const apiUrl = `https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev/api/${endpoint}`;
-
-        console.log('Datos a enviar:', datosBase);
-
-        const response = await fetch(apiUrl, {
-            method: "POST",
+        // Enviar al worker
+        const response = await fetch('https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev', {
+            method: 'POST',
             headers: { 
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(datosBase)
         });
 
-        // Log the response status and headers
-        console.log('Response status:', response.status);
-        console.log('Response headers:', [...response.headers.entries()]);
-
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Error response:', errorText);
-            throw new Error(`Error HTTP ${response.status}: ${errorText}`);
+            console.error('Error completo:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(errorText);
         }
 
         const resultado = await response.json();
-        console.log('Respuesta del Worker:', resultado);
-        
         if (resultado.error) {
             throw new Error(resultado.error);
         }
@@ -608,9 +670,6 @@ async function manejarEnvioFormulario(e) {
     } catch (error) {
         console.error('Error detallado:', error);
         alert('Error al enviar el formulario: ' + error.message);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Unirme al equipo';
     }
 }
 
@@ -634,7 +693,7 @@ function obtenerEspecialidadesDetalladas() {
         instalacion_pisos_experiencia: null
     };
 
-    // Mapeo de nombres visuales a nombres de columnas
+    // Mantener el mapeo dentro de la función
     const mappings = {
         'Drywall / Superboard': 'drywall_superboard',
         'Pintura y Acabados': 'pintura_acabados',
