@@ -892,26 +892,51 @@ select#genero:focus {
     outline: none;
 }
 
-/* Indicador de campo requerido */
-label[for="fechaNacimiento"]::after,
-label[for="genero"]::after,
+/* Actualizar el indicador de campo requerido para incluir todos los campos obligatorios */
+label[for="tipoDocumento"]::after,
+label[for="numeroDocumento"]::after,
 label[for="nombre"]::after,
 label[for="apellido"]::after,
 label[for="telefono"]::after,
 label[for="email"]::after,
+label[for="fechaNacimiento"]::after,
+label[for="genero"]::after,
 label[for="departamento"]::after,
-label[for="municipio"]::after {
+label[for="municipio"]::after,
+label[for="disponibilidad"]::after,
+label[for="experiencia"]::after,
+label[for="software"]::after {
     content: "*";
     color: #fa6700;
     margin-left: 4px;
 }
 
-/* Agregar borde izquierdo para campos requeridos */
-.form-group select:required,
-.form-group input:required,
-#departamento:required,
-#municipio:required {
-    border-left: 3px solid var(--primary-color);
+/* Estilos para campos inválidos */
+.form-group input.invalid,
+.form-group select.invalid {
+    border-color: #ff4444;
+    background-color: #fff8f8;
+}
+
+/* Mensaje de error */
+.error-message {
+    color: #ff4444;
+    font-size: 0.85em;
+    margin-top: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Estilos para la selección de roles */

@@ -259,18 +259,11 @@ function initForm() {
         // Eliminar cualquier caracter que no sea número
         let valor = e.target.value.replace(/\D/g, '');
         
-        // Limitar a 12 dígitos
-        valor = valor.substring(0, 12);
+        // Limitar a 20 dígitos
+        valor = valor.substring(0, 20);
         
         // Actualizar el valor del campo
         e.target.value = valor;
-        
-        // Validar longitud mínima
-        if (valor.length < 6) {
-            e.target.setCustomValidity('El número de documento debe tener entre 6 y 12 dígitos');
-        } else {
-            e.target.setCustomValidity('');
-        }
     });
 
     // Agregar validación para teléfono
@@ -285,15 +278,19 @@ function initForm() {
         // Actualizar el valor del campo
         e.target.value = valor;
         
-        // Validar longitud
-        if (valor.length !== 10) {
-            e.target.setCustomValidity('El teléfono debe tener exactamente 10 dígitos');
+        // Validar longitud y mostrar/ocultar error
+        if (valor.length > 0 && valor.length !== 10) {
+            mostrarError(this, 'El teléfono debe tener exactamente 10 dígitos');
         } else {
-            e.target.setCustomValidity('');
+            limpiarError(this);
+            // Restaurar la validación normal del formulario
+            if (!valor) {
+                mostrarError(this, 'Por favor ingresa tu número de teléfono');
+            }
         }
     });
 
-    // Agregar validación para teléfono secundario (opcional)
+    // Hacer lo mismo para el teléfono secundario
     const telefonoSecundario = document.getElementById('telefonoSecundario');
     telefonoSecundario.addEventListener('input', function(e) {
         // Eliminar cualquier caracter que no sea número
@@ -307,9 +304,9 @@ function initForm() {
         
         // Validar longitud solo si hay algún valor
         if (valor.length > 0 && valor.length !== 10) {
-            e.target.setCustomValidity('El teléfono debe tener exactamente 10 dígitos');
+            mostrarError(this, 'El teléfono debe tener exactamente 10 dígitos');
         } else {
-            e.target.setCustomValidity('');
+            limpiarError(this);
         }
     });
 
@@ -317,12 +314,86 @@ function initForm() {
     const form = document.getElementById('registroForm');
     form.addEventListener('submit', manejarEnvioFormulario);
 
-    // Agregar validación en tiempo real
+    // Inicializar el input de fecha
+    initDateInput();
+
+    // Actualizar la validación en tiempo real
     document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
         if (!validarEdad(e.target.value)) {
             e.target.setCustomValidity('Debes ser mayor de edad para registrarte');
+            alert('Debes ser mayor de edad para registrarte');
         } else {
             e.target.setCustomValidity('');
+        }
+    });
+
+    // Agregar listeners para limpiar errores cuando se completen los campos
+    const camposRequeridos = [
+        'tipoDocumento', 'numeroDocumento', 'nombre', 'apellido',
+        'telefono', 'email', 'fechaNacimiento', 'genero',
+        'departamento', 'municipio', 'disponibilidad'
+    ];
+
+    camposRequeridos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.addEventListener('change', function() {
+                if (this.value) {
+                    // Limpiar error cuando el campo tenga valor
+                    this.classList.remove('invalid');
+                    const errorDiv = this.parentNode.querySelector('.error-message');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
+
+            // Para inputs de texto, también escuchar el evento input
+            if (elemento.type === 'text' || elemento.type === 'email' || elemento.type === 'tel') {
+                elemento.addEventListener('input', function() {
+                    if (this.value) {
+                        this.classList.remove('invalid');
+                        const errorDiv = this.parentNode.querySelector('.error-message');
+                        if (errorDiv) {
+                            errorDiv.remove();
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // Agregar listeners especiales para roles que requieren campos adicionales
+    document.getElementById('categoria').addEventListener('change', function() {
+        const categoria = this.value;
+        if (categoria === 'arquitecto' || categoria === 'siso') {
+            const experiencia = document.getElementById('experiencia');
+            if (experiencia) {
+                experiencia.addEventListener('change', function() {
+                    if (this.value) {
+                        this.classList.remove('invalid');
+                        const errorDiv = this.parentNode.querySelector('.error-message');
+                        if (errorDiv) {
+                            errorDiv.remove();
+                        }
+                    }
+                });
+            }
+
+            if (categoria === 'arquitecto') {
+                const software = document.getElementById('software');
+                if (software) {
+                    software.addEventListener('change', function() {
+                        if (this.value) {
+                            this.classList.remove('invalid');
+                            const errorDiv = this.parentNode.querySelector('.error-message');
+                            if (errorDiv) {
+                                errorDiv.remove();
+                            }
+                        }
+                    });
+                }
+            }
         }
     });
 }
@@ -577,10 +648,81 @@ function validarTerminos() {
     });
 }
 
-// Update manejarEnvioFormulario function
+function validarFormulario() {
+    let isValid = true;
+    const camposRequeridos = [
+        { id: 'tipoDocumento', mensaje: 'Por favor selecciona el tipo de documento' },
+        { id: 'numeroDocumento', mensaje: 'Por favor ingresa tu número de documento' },
+        { id: 'nombre', mensaje: 'Por favor ingresa tu nombre' },
+        { id: 'apellido', mensaje: 'Por favor ingresa tu apellido' },
+        { id: 'telefono', mensaje: 'Por favor ingresa tu número de teléfono' },
+        { id: 'email', mensaje: 'Por favor ingresa tu correo electrónico' },
+        { id: 'fechaNacimiento', mensaje: 'Por favor selecciona tu fecha de nacimiento' },
+        { id: 'genero', mensaje: 'Por favor selecciona tu género' },
+        { id: 'departamento', mensaje: 'Por favor selecciona tu departamento' },
+        { id: 'municipio', mensaje: 'Por favor selecciona tu municipio' },
+        { id: 'disponibilidad', mensaje: 'Por favor selecciona tu disponibilidad' }
+    ];
+
+    // Limpiar mensajes de error anteriores
+    document.querySelectorAll('.error-message').forEach(el => el.remove());
+    document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+
+    // Validar cada campo requerido
+    camposRequeridos.forEach(campo => {
+        const elemento = document.getElementById(campo.id);
+        if (!elemento.value) {
+            mostrarError(elemento, campo.mensaje);
+            isValid = false;
+        } else if (campo.id === 'telefono' && elemento.value.length !== 10) {
+            // Validación específica para teléfono
+            mostrarError(elemento, 'El teléfono debe tener exactamente 10 dígitos');
+            isValid = false;
+        }
+    });
+
+    // Validar campos específicos según el rol
+    const categoria = document.getElementById('categoria').value;
+    if (categoria === 'arquitecto' || categoria === 'siso') {
+        const experiencia = document.getElementById('experiencia');
+        if (!experiencia.value) {
+            mostrarError(experiencia, 'Por favor ingresa tus años de experiencia');
+            isValid = false;
+        }
+        
+        if (categoria === 'arquitecto') {
+            const software = document.getElementById('software');
+            if (!software.value) {
+                mostrarError(software, 'Por favor ingresa el software que manejas');
+                isValid = false;
+            }
+        }
+    }
+
+    return isValid;
+}
+
+function mostrarError(elemento, mensaje) {
+    elemento.classList.add('invalid');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = mensaje;
+    elemento.parentNode.appendChild(errorDiv);
+    
+    // Hacer scroll al primer error si no está visible
+    if (!isElementInViewport(elemento)) {
+        elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// Actualizar la función de manejo del formulario
 async function manejarEnvioFormulario(e) {
     e.preventDefault();
     
+    if (!validarFormulario()) {
+        return;
+    }
+
     // Obtener todos los valores necesarios
     const fechaNacimiento = document.getElementById('fechaNacimiento').value;
     const genero = document.getElementById('genero').value;
@@ -658,11 +800,6 @@ async function manejarEnvioFormulario(e) {
                 body: errorText
             });
             throw new Error(errorText);
-        }
-
-        const resultado = await response.json();
-        if (resultado.error) {
-            throw new Error(resultado.error);
         }
 
         mostrarMensajeExito();
@@ -937,12 +1074,54 @@ const validaciones = {
 function validarEdad(fechaNacimiento) {
     const hoy = new Date();
     const nacimiento = new Date(fechaNacimiento);
+    
+    // Calcular edad considerando mes y día
     let edad = hoy.getFullYear() - nacimiento.getFullYear();
     const mes = hoy.getMonth() - nacimiento.getMonth();
     
+    // Si no ha llegado el mes de cumpleaños, o si es el mes pero no ha llegado el día
     if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
         edad--;
     }
     
     return edad >= 18;
+}
+
+// Actualizar la configuración del input de fecha
+function initDateInput() {
+    const fechaNacimiento = document.getElementById('fechaNacimiento');
+    
+    // Calcular la fecha máxima (18 años atrás desde hoy)
+    const hoy = new Date();
+    const maxDate = new Date(
+        hoy.getFullYear() - 18,
+        hoy.getMonth(),
+        hoy.getDate()
+    );
+    
+    // Formatear la fecha como YYYY-MM-DD
+    const maxDateString = maxDate.toISOString().split('T')[0];
+    
+    // Establecer el atributo max
+    fechaNacimiento.setAttribute('max', maxDateString);
+}
+
+// Función auxiliar para verificar si un elemento está visible
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
+
+// Función auxiliar para limpiar error
+function limpiarError(elemento) {
+    elemento.classList.remove('invalid');
+    const errorDiv = elemento.parentNode.querySelector('.error-message');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
 }
