@@ -539,14 +539,7 @@ async function manejarEnvioFormulario(e) {
     try {
         const categoria = document.getElementById('categoria').value;
         
-        // Determine the correct API endpoint based on role
-        const endpoint = (categoria === 'arquitecto' || categoria === 'siso')
-            ? "arquitectos-siso"
-            : "profesionales";  // Todos los demás roles van a este endpoint
-        
-        const apiUrl = `https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev/api/${endpoint}`;
-        
-        // Prepare base data
+        // Preparar datos base
         const datosBase = {
             rol: categoria,
             tipo_documento: document.getElementById('tipoDocumento').value,
@@ -558,25 +551,32 @@ async function manejarEnvioFormulario(e) {
             email: document.getElementById('email').value,
             departamento: document.getElementById('departamento').value,
             municipio: document.getElementById('municipio').value,
-            disponibilidad: document.getElementById('disponibilidad').value
+            disponibilidad: document.getElementById('disponibilidad').value,
+            fechanacimiento: document.getElementById('fechaNacimiento').value, // Cambiado a fechanacimiento
+            genero: document.getElementById('genero').value
         };
 
-        // Add role-specific data
+        // Añadir datos específicos según el rol
         if (categoria === 'arquitecto' || categoria === 'siso') {
             Object.assign(datosBase, {
                 experiencia: document.getElementById('experiencia').value,
-                software: categoria === 'arquitecto' ? document.getElementById('software').value : null,
+                software: categoria === 'arquitecto' ? document.getElementById('software').value : null
             });
         } else if (categoria === 'tecnico' || categoria === 'instalador') {
-            // Para técnicos e instaladores, añadir especialidades
-            Object.assign(datosBase, obtenerEspecialidadesDetalladas());
+            // Para técnicos e instaladores, añadir especialidades con el formato correcto
+            const especialidades = obtenerEspecialidadesDetalladas();
+            Object.assign(datosBase, especialidades);
         }
-        // Los nuevos roles (ayudante y aseador) no requieren datos adicionales
 
-        console.log(`Enviando datos a: ${apiUrl}`);
-        console.log('Datos a enviar:', JSON.stringify(datosBase, null, 2));
+        // Determinar el endpoint según el rol
+        const endpoint = (categoria === 'tecnico' || categoria === 'instalador') 
+            ? 'profesionales' 
+            : 'otros_profesionales';
 
-        // Send data to Worker
+        const apiUrl = `https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev/api/${endpoint}`;
+
+        console.log('Datos a enviar:', datosBase);
+
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: { 
@@ -614,32 +614,27 @@ async function manejarEnvioFormulario(e) {
     }
 }
 
-function prepareDatos(categoria) {
-    // Your existing data preparation logic
-    const datos = {
-        'Fecha': new Date().toLocaleString('es-CO'),
-        'Rol': categoria,
-        // ... rest of your data collection
-    };
-
-    // Add role-specific details
-    if (categoria === 'tecnico' || categoria === 'instalador') {
-        Object.assign(datos, obtenerEspecialidadesDetalladas());
-    }
-
-    return datos;
-}
-
-// Update obtenerEspecialidadesDetalladas to return boolean values
 function obtenerEspecialidadesDetalladas() {
-    const especialidades = {};
-    const experienciasTexto = {
-        '1': 'Menos de 1 año',
-        '2': 'Entre 1 y 3 años',
-        '3': 'Entre 3 y 5 años',
-        '4': 'Más de 5 años'
+    const especialidades = {
+        drywall_superboard: false,
+        pintura_acabados: false,
+        electricidad: false,
+        plomeria: false,
+        carpinteria: false,
+        enchapado: false,
+        instalacion_cocinas: false,
+        instalacion_pisos: false,
+        drywall_superboard_experiencia: null,
+        pintura_acabados_experiencia: null,
+        electricidad_experiencia: null,
+        plomeria_experiencia: null,
+        carpinteria_experiencia: null,
+        enchapado_experiencia: null,
+        instalacion_cocinas_experiencia: null,
+        instalacion_pisos_experiencia: null
     };
 
+    // Mapeo de nombres visuales a nombres de columnas
     const mappings = {
         'Drywall / Superboard': 'drywall_superboard',
         'Pintura y Acabados': 'pintura_acabados',
@@ -657,12 +652,11 @@ function obtenerEspecialidadesDetalladas() {
         const experienciaRadio = card.querySelector('input[type="radio"]:checked');
         
         const columnName = mappings[nombre];
-
         if (columnName) {
             especialidades[columnName] = isSelected;
-            especialidades[`${columnName}_experiencia`] = isSelected && experienciaRadio 
-                ? experienciaRadio.nextElementSibling.textContent 
-                : null;
+            if (isSelected && experienciaRadio) {
+                especialidades[`${columnName}_experiencia`] = experienciaRadio.nextElementSibling.textContent;
+            }
         }
     });
 
