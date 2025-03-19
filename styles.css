@@ -12,14 +12,18 @@ body {
   font-size: 16px;
   display: flex;
   flex-direction: column;
+  padding-top: 65px;
 }
 
 .container {
   flex: 1;
-  padding: 2rem 1rem;
-  margin-top: -1rem; /* Reduced from -2rem to -1rem */
+  padding: 2rem;
   position: relative;
   background: url('assets/fondoformulario.webp') center/cover no-repeat fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1rem;
 }
 
 .container::before {
@@ -29,7 +33,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   z-index: 0;
 }
@@ -39,11 +43,11 @@ form {
   z-index: 1;
   max-width: 800px;
   width: 100%;
-  margin: 2rem auto; /* Added top/bottom margin */
-  background-color: rgba(255, 255, 255, 1);
+  margin: 2rem auto;
+  background-color: transparent;
   padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   box-sizing: border-box;
 }
 
@@ -52,12 +56,7 @@ form.with-specialties {
 }
 
 .logo-container {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.logo-container img {
-  max-width: 200px;
+  display: none;
 }
 
 h2 {
@@ -77,9 +76,10 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 1.8rem;
   width: 100%;
   box-sizing: border-box;
+  padding: 0;
+  margin-bottom: 1.8rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -145,14 +145,10 @@ input::placeholder {
   transition: background-color 0.3s;
 }
 
-.btn:hover {
-  background-color: var(--primary-dark);
-}
-
 .btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 1;
   pointer-events: none;
   transform: none;
 }
@@ -164,7 +160,7 @@ input::placeholder {
 }
 
 .terms-container {
-  background: rgba(248, 249, 250, 0.75);
+  background: rgb(248, 249, 250);
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 2rem;
@@ -233,13 +229,34 @@ input::placeholder {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+  will-change: opacity, transform;
+}
+
+.categoria-campos:not(.hidden) {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .especialidades-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin: 1.5rem 0;
+  padding: 0;
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+  will-change: opacity, transform;
+}
+
+.especialidades-grid:not(.hidden) {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .especialidad-card {
@@ -351,22 +368,69 @@ input::placeholder {
 }
 
 .navbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
   position: fixed;
   width: 100%;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  padding-left: 2rem;
+  padding: 0.8rem 2rem;
+  box-sizing: border-box;
 }
 
-.navbar img {
-  height: 60px;
-  transition: height 0.3s;
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-left img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-right: 3rem; /* Aumentar el margen derecho para evitar que se corte */
+}
+
+.nav-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap; /* Evitar que el texto se corte */
+  padding: 0.5rem 0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--primary-color);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
 }
 
 .footer {
@@ -405,18 +469,33 @@ input::placeholder {
 
 .title-container {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-top: 0;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.title-icon {
+  width: 80px;
+  height: auto;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
 
 .title-container h1 {
   color: var(--primary-color);
   font-size: 2.2rem;
   margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .title-container .subtitle {
-  color: #666;
+  color: #ffffff;
   font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .especialidades-container {
@@ -746,18 +825,12 @@ input::placeholder {
 
     .container {
         padding: 1rem;
-        margin-top: 60px;
-        margin-top: 0;
-        padding-top: 1rem;
     }
 
     form {
-        padding: 1rem;
+        padding: 0;
         margin: 0;
         width: 100%;
-        border-radius: 10px;
-        margin: 1rem auto;
-        padding: 1.5rem;
     }
 
     .form-row, 
@@ -810,11 +883,16 @@ input::placeholder {
     }
 
     .navbar {
-        padding: 0.5rem 1rem;
+        padding: 0.7rem 1rem;
     }
 
-    .navbar img {
-        height: 40px;
+    .navbar-right {
+        gap: 1rem;
+        margin-right: 1rem;
+    }
+
+    .nav-link {
+        font-size: 0.85rem;
     }
 
     .categoria-campos {
@@ -839,6 +917,56 @@ input::placeholder {
         position: relative;
         top: 0;
         box-shadow: none;
+    }
+
+    .title-icon {
+        width: 60px;
+        margin-bottom: 1rem;
+    }
+
+    .section-card.info-personal-section {
+        max-width: 100%;
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .section-card {
+        width: calc(100% - 2rem);
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .section-content {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-group input,
+    .form-group select,
+    .social-card,
+    .gender-container {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .section-card h3 {
+        text-align: center;
+        font-size: 1.4rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .section-description {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+        padding: 0 0.5rem;
+    }
+
+    .roles-container,
+    .especialidades-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 }
 
@@ -942,13 +1070,18 @@ label[for="software"]::after {
 /* Estilos para la selección de roles */
 .roles-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
     margin: 1.5rem 0;
     width: 100%;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .role-card {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
     background-color: #fff;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
@@ -1257,4 +1390,293 @@ input[type="date"]::-webkit-clear-button {
 /* Mejoras visuales para la consistencia */
 .gender-container {
     margin-top: 0.5rem;
+}
+
+/* Actualizar los estilos de las tarjetas sociales */
+.social-media-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.social-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.social-card {
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.social-card-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    cursor: pointer;
+    user-select: none;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    color: #666;
+}
+
+.social-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.toggle-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+.social-card.active .toggle-icon {
+    transform: rotate(45deg);
+}
+
+.social-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: white;
+    padding: 0;
+    border-top: 1px solid transparent; /* Inicialmente transparente */
+}
+
+.social-card.active .social-card-content {
+    max-height: 200px;
+    padding: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.social-card input[type="text"],
+.social-card input[type="tel"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.social-card input[name="instagram-user"] {
+    padding-left: 2rem;
+}
+
+/* Actualizar los estilos para WhatsApp */
+.whatsapp-option {
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.whatsapp-input {
+    max-height: 60px; /* Altura aproximada del input + padding */
+    opacity: 1;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.whatsapp-input.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.whatsapp-input input {
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.whatsapp-input.hidden input {
+    transform: translateY(-100%);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.checkbox-label span {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Ajustar los iconos de redes sociales */
+.social-card[data-social="instagram"] .social-icon {
+    color: #E4405F;
+}
+
+.social-card[data-social="facebook"] .social-icon {
+    color: #1877F2;
+}
+
+.social-card[data-social="whatsapp"] .social-icon {
+    color: #25D366;
+}
+
+/* Estilos para las secciones principales */
+.section-card {
+    width: 100%;
+    max-width: 900px;
+    margin: 1rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+}
+
+.section-card h3 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.section-description {
+    color: #4a4a4a;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 90%;
+}
+
+.section-content {
+    padding-top: 1rem;
+}
+
+/* Ajustar el scroll para que tenga un poco de padding */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+/* Hacer más ancha la sección de información personal */
+.section-card.info-personal-section {
+    max-width: 900px; /* Aumentar el ancho máximo */
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    background: rgba(255, 255, 255, 1); /* Mantener el fondo blanco de la tarjeta */
+}
+
+/* Asegurar que todas las tarjetas sociales tengan el mismo ancho */
+.social-media-section .social-cards-container {
+    width: 100%;
+}
+
+.social-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Asegurar que la sección de roles tenga el mismo ancho */
+.info-laboral-section .roles-container {
+    width: 100%;
+}
+
+/* Asegurar que todas las secciones de campos tengan el mismo ancho */
+.categoria-campos {
+    width: 100%;
+    max-width: 900px;
+    margin: 1rem auto;
+    box-sizing: border-box;
+}
+
+/* Mejorar el estilo del enlace Contáctanos */
+.navbar-right {
+    margin-left: auto;
+}
+
+.contact-link {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.contact-link:hover {
+    color: var(--primary-color);
+}
+
+.contact-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.contact-link:hover::after {
+    width: calc(100% - 2rem);
+}
+
+/* Hacer las tarjetas más anchas en desktop */
+@media (min-width: 769px) {
+    .section-card {
+        max-width: 1300px; /* Aumentado de 1125px a 1300px */
+    }
+
+    .section-card.info-personal-section {
+        max-width: 1300px; /* Aumentado de 1125px a 1300px */
+    }
+
+    .categoria-campos {
+        max-width: 1300px; /* Aumentado de 1125px a 1300px */
+    }
+
+    /* Ajustar el contenedor del formulario para mantener la proporción */
+    form {
+        max-width: 1300px; /* Aumentado para coincidir con las tarjetas */
+    }
+
+    /* Ajustar el contenedor de roles para el nuevo ancho */
+    .roles-container {
+        gap: 1.5rem;
+        padding: 0.5rem;
+    }
 }

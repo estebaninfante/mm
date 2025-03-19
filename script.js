@@ -132,6 +132,33 @@ function initRoleSelection() {
             
             // Actualizar campos basados en la categoría
             actualizarCamposCategoria();
+
+            // Esperar a que se complete la actualización de campos
+            setTimeout(() => {
+                let targetSection;
+                
+                if (roleValue === 'arquitecto' || roleValue === 'siso') {
+                    targetSection = document.getElementById('arquitecto-siso');
+                } else if (roleValue === 'tecnico' || roleValue === 'instalador') {
+                    targetSection = document.querySelector('.especialidades-section');
+                } else {
+                    targetSection = document.getElementById('disponibilidad-section');
+                }
+
+                if (targetSection) {
+                    // Calcular la posición del elemento
+                    const elementPosition = targetSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - 100; // 100px de margen superior
+
+                    // Realizar scroll suave con opciones personalizadas
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth',
+                        // Usar una curva de animación más suave
+                        easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)'
+                    });
+                }
+            }, 300);
         });
     });
 }
@@ -761,9 +788,8 @@ async function manejarEnvioFormulario(e) {
             departamento: document.getElementById('departamento').value,
             municipio: document.getElementById('municipio').value,
             disponibilidad: document.getElementById('disponibilidad').value,
-            fechanacimiento: fechaNacimiento, // Asegurarse de que este campo se envíe
-            genero: genero, // Asegurarse de que este campo se envíe
-            fecha: new Date().toISOString()
+            fechanacimiento: fechaNacimiento, 
+            genero: genero,
         };
 
         // Log de verificación de los datos base
@@ -1125,3 +1151,84 @@ function limpiarError(elemento) {
         errorDiv.remove();
     }
 }
+
+// Actualizar la función initWhatsAppLogic
+function initWhatsAppLogic() {
+    const whatsappCard = document.querySelector('.social-card[data-social="whatsapp"]');
+    const checkbox = whatsappCard.querySelector('#same-whatsapp');
+    const whatsappInput = whatsappCard.querySelector('.whatsapp-input');
+    const whatsappNumberInput = whatsappInput.querySelector('input[name="whatsapp-number"]');
+    
+    // Asegurarse de que el input esté visible por defecto
+    whatsappInput.classList.remove('hidden');
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Guardar el valor actual antes de ocultarlo
+            whatsappNumberInput.dataset.previousValue = whatsappNumberInput.value;
+            
+            // Obtener y usar el número de teléfono principal
+            const mainPhone = document.getElementById('telefono').value;
+            whatsappNumberInput.value = mainPhone;
+            
+            // Ocultar el campo con transición suave
+            whatsappInput.classList.add('hidden');
+        } else {
+            // Mostrar el campo con transición suave
+            whatsappInput.classList.remove('hidden');
+            
+            // Restaurar el valor previo si existía
+            setTimeout(() => {
+                if (whatsappNumberInput.dataset.previousValue) {
+                    whatsappNumberInput.value = whatsappNumberInput.dataset.previousValue;
+                } else {
+                    whatsappNumberInput.value = '';
+                }
+            }, 50); // Pequeño retraso para que la transición sea más suave
+        }
+    });
+
+    // Actualizar el valor de WhatsApp cuando cambie el teléfono principal
+    document.getElementById('telefono').addEventListener('change', function() {
+        if (checkbox.checked) {
+            whatsappNumberInput.value = this.value;
+        }
+    });
+}
+
+// Actualizar la función initSocialCards
+function initSocialCards() {
+    const socialCards = document.querySelectorAll('.social-card');
+    
+    socialCards.forEach(card => {
+        const header = card.querySelector('.social-card-header');
+        const content = card.querySelector('.social-card-content');
+        
+        header.addEventListener('click', () => {
+            const isActive = card.classList.contains('active');
+            
+            // Cerrar todas las tarjetas
+            socialCards.forEach(c => {
+                c.classList.remove('active');
+                const otherContent = c.querySelector('.social-card-content');
+                otherContent.style.maxHeight = '0';
+                otherContent.style.padding = '0';
+                otherContent.style.borderTop = '1px solid transparent';
+            });
+            
+            // Si la tarjeta no estaba activa, abrirla
+            if (!isActive) {
+                card.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.padding = '1.5rem';
+                content.style.borderTop = '1px solid #eee';
+            }
+        });
+    });
+
+    // Inicializar la lógica específica de WhatsApp
+    initWhatsAppLogic();
+}
+
+// Asegurarse de que se inicialice cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', initSocialCards);
