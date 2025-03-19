@@ -54,6 +54,20 @@
                             <input type="text" id="apellido" name="apellido" required>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departamento">Departamento</label>
+                            <select id="departamento" name="departamento" required>
+                                <option value="">Seleccione un departamento...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipio">Ciudad/Municipio</label>
+                            <select id="municipio" name="municipio" required>
+                                <option value="">Seleccione primero el departamento...</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-row fecha-genero">
                         <div class="form-group">
                             <label for="fechaNacimiento">Fecha de Nacimiento</label>
@@ -120,19 +134,27 @@
                             <input type="email" id="email" name="email" required>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="departamento">Departamento</label>
-                            <select id="departamento" name="departamento" required>
-                                <option value="">Seleccione un departamento...</option>
-                            </select>
+                </div>
+            </div>
+
+            <!-- Seguridad Social -->
+            <div class="section-card seguridad-social-section">
+                <h3>Seguridad Social</h3>
+                <p class="section-description">Información sobre tu estado actual de seguridad social</p>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label>¿Actualmente pagas tu seguridad social como independiente?<span class="required">*</span></label>
+                        <div class="seguridad-social-options">
+                            <div class="option-card" data-value="si">
+                                <h4>Sí</h4>
+                                <p>Pago mi seguridad social como independiente</p>
+                            </div>
+                            <div class="option-card" data-value="no">
+                                <h4>No</h4>
+                                <p>No pago seguridad social como independiente</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="municipio">Ciudad/Municipio</label>
-                            <select id="municipio" name="municipio" required>
-                                <option value="">Seleccione primero el departamento...</option>
-                            </select>
-                        </div>
+                        <input type="hidden" id="seguridad_social" name="seguridad_social" required>
                     </div>
                 </div>
             </div>
@@ -170,7 +192,7 @@
                                 <span class="toggle-icon">+</span>
                             </div>
                             <div class="social-card-content">
-                                <input type="text" name="facebook-user">
+                                <input type="text" name="facebook-user" placeholder="Nombre de usuario o enlace de perfil">
                             </div>
                         </div>
 
@@ -271,7 +293,7 @@
             <div class="terms-container">
                 <div class="checkbox-container">
                     <input type="checkbox" id="termsContact" name="termsContact" required>
-                    <label for="termsContact">Autorizo a Manos Maestras para contactarme y gestionar mis datos personales</label>
+                    <label for="termsContact">Autorizo a Manos Maestras para contactarme por cualquier medio para ofertas laborales, novedades y gestionar mis datos personales</label>
                 </div>
                 <div class="checkbox-container">
                     <input type="checkbox" id="termsPrivacy" name="termsPrivacy" required>

@@ -35,7 +35,8 @@ const especialidadesConfig = {
         carpinteria: 'Carpintería',
         enchapado: 'Enchapado',
         cocinas: 'Instalación de Cocinas',
-        pisos: 'Instalación de Pisos'
+        pisos: 'Instalación de Pisos',
+        mamposteria: 'Mampostería'
     },
     instalador: {
         drywall: 'Drywall / Superboard',
@@ -45,7 +46,8 @@ const especialidadesConfig = {
         carpinteria: 'Carpintería',
         enchapado: 'Enchapado',
         cocinas: 'Instalación de Cocinas',
-        pisos: 'Instalación de Pisos'
+        pisos: 'Instalación de Pisos',
+        mamposteria: 'Mampostería'
     }
 };
 
@@ -293,31 +295,36 @@ function initForm() {
         e.target.value = valor;
     });
 
-    // Agregar validación para teléfono
-    const telefono = document.getElementById('telefono');
-    telefono.addEventListener('input', function(e) {
-        // Eliminar cualquier caracter que no sea número
-        let valor = e.target.value.replace(/\D/g, '');
-        
-        // Limitar a 10 dígitos
-        valor = valor.substring(0, 10);
-        
-        // Actualizar el valor del campo
-        e.target.value = valor;
-        
-        // Validar longitud y mostrar/ocultar error
-        if (valor.length > 0 && valor.length !== 10) {
-            mostrarError(this, 'El teléfono debe tener exactamente 10 dígitos');
-        } else {
+    // Agregar validación para teléfono principal
+    const telefonoPrincipal = document.getElementById('telefono');
+    if (telefonoPrincipal) {
+        telefonoPrincipal.addEventListener('input', function(e) {
+            // Eliminar cualquier caracter que no sea número
+            let valor = e.target.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            valor = valor.substring(0, 10);
+            
+            // Actualizar el valor del campo
+            e.target.value = valor;
+            
+            // Limpiar errores anteriores
             limpiarError(this);
-            // Restaurar la validación normal del formulario
-            if (!valor) {
+            
+            // Solo mostrar error si el usuario ha empezado a escribir y no está completo
+            if (valor.length > 0 && valor.length !== 10) {
+                mostrarError(this, 'El teléfono debe tener exactamente 10 dígitos');
+            }
+        });
+
+        telefonoPrincipal.addEventListener('blur', function() {
+            if (!this.value) {
                 mostrarError(this, 'Por favor ingresa tu número de teléfono');
             }
-        }
-    });
+        });
+    }
 
-    // Hacer lo mismo para el teléfono secundario
+    // Agregar validación para teléfono secundario
     const telefonoSecundario = document.getElementById('telefonoSecundario');
     telefonoSecundario.addEventListener('input', function(e) {
         // Eliminar cualquier caracter que no sea número
@@ -329,11 +336,12 @@ function initForm() {
         // Actualizar el valor del campo
         e.target.value = valor;
         
-        // Validar longitud solo si hay algún valor
+        // Limpiar errores anteriores primero
+        limpiarError(this);
+        
+        // Validar longitud solo si hay algún valor (ya que es opcional)
         if (valor.length > 0 && valor.length !== 10) {
             mostrarError(this, 'El teléfono debe tener exactamente 10 dígitos');
-        } else {
-            limpiarError(this);
         }
     });
 
@@ -358,11 +366,12 @@ function initForm() {
     const camposRequeridos = [
         'tipoDocumento', 'numeroDocumento', 'nombre', 'apellido',
         'telefono', 'email', 'fechaNacimiento', 'genero',
-        'departamento', 'municipio', 'disponibilidad'
+        'departamento', 'municipio', 'disponibilidad',
+        { id: 'seguridad_social', mensaje: 'Por favor indica si pagas seguridad social' }
     ];
 
     camposRequeridos.forEach(id => {
-        const elemento = document.getElementById(id);
+        const elemento = document.getElementById(id.id || id);
         if (elemento) {
             elemento.addEventListener('change', function() {
                 if (this.value) {
@@ -423,6 +432,81 @@ function initForm() {
             }
         }
     });
+
+    initSeguridadSocial();
+
+    // Validación para Instagram
+    const instagramInput = document.querySelector('input[name="instagram-user"]');
+    if (instagramInput) {
+        instagramInput.addEventListener('input', function(e) {
+            // Eliminar espacios y caracteres especiales no permitidos
+            let valor = e.target.value.replace(/[^A-Za-z0-9._]/g, '');
+            
+            // Limitar a 30 caracteres
+            valor = valor.substring(0, 30);
+            
+            // Actualizar el valor del campo
+            e.target.value = valor;
+            
+            // Limpiar errores anteriores
+            limpiarError(this);
+            
+            // Validar formato
+            if (valor.length > 0) {
+                if (!/^[A-Za-z0-9._]{1,30}$/.test(valor)) {
+                    mostrarError(this, 'Usuario de Instagram inválido. Solo se permiten letras, números, puntos y guiones bajos');
+                }
+            }
+        });
+    }
+
+    // Validación para Facebook
+    const facebookInput = document.querySelector('input[name="facebook-user"]');
+    if (facebookInput) {
+        facebookInput.addEventListener('input', function(e) {
+            // Eliminar caracteres especiales no permitidos
+            let valor = e.target.value.replace(/[^A-Za-z0-9._\s]/g, '');
+            
+            // Limitar a 50 caracteres
+            valor = valor.substring(0, 50);
+            
+            // Actualizar el valor del campo
+            e.target.value = valor;
+            
+            // Limpiar errores anteriores
+            limpiarError(this);
+            
+            // Validar formato
+            if (valor.length > 0) {
+                if (!/^[A-Za-z0-9._\s]{1,50}$/.test(valor)) {
+                    mostrarError(this, 'Usuario de Facebook inválido. Solo se permiten letras, números, puntos, guiones bajos y espacios');
+                }
+            }
+        });
+    }
+
+    // Validación para WhatsApp
+    const whatsappInput = document.querySelector('input[name="whatsapp-number"]');
+    if (whatsappInput) {
+        whatsappInput.addEventListener('input', function(e) {
+            // Eliminar cualquier caracter que no sea número
+            let valor = e.target.value.replace(/\D/g, '');
+            
+            // Limitar a 10 dígitos
+            valor = valor.substring(0, 10);
+            
+            // Actualizar el valor del campo
+            e.target.value = valor;
+            
+            // Limpiar errores anteriores
+            limpiarError(this);
+            
+            // Validar longitud solo si hay algún valor
+            if (valor.length > 0 && valor.length !== 10) {
+                mostrarError(this, 'El número de WhatsApp debe tener exactamente 10 dígitos');
+            }
+        });
+    }
 }
 
 // Modificar la función actualizarCamposCategoria para trabajar con el input oculto
@@ -677,6 +761,7 @@ function validarTerminos() {
 
 function validarFormulario() {
     let isValid = true;
+    let primerError = null;
     const camposRequeridos = [
         { id: 'tipoDocumento', mensaje: 'Por favor selecciona el tipo de documento' },
         { id: 'numeroDocumento', mensaje: 'Por favor ingresa tu número de documento' },
@@ -688,7 +773,8 @@ function validarFormulario() {
         { id: 'genero', mensaje: 'Por favor selecciona tu género' },
         { id: 'departamento', mensaje: 'Por favor selecciona tu departamento' },
         { id: 'municipio', mensaje: 'Por favor selecciona tu municipio' },
-        { id: 'disponibilidad', mensaje: 'Por favor selecciona tu disponibilidad' }
+        { id: 'disponibilidad', mensaje: 'Por favor selecciona tu disponibilidad' },
+        { id: 'seguridad_social', mensaje: 'Por favor indica si pagas seguridad social' }
     ];
 
     // Limpiar mensajes de error anteriores
@@ -701,10 +787,21 @@ function validarFormulario() {
         if (!elemento.value) {
             mostrarError(elemento, campo.mensaje);
             isValid = false;
+            if (!primerError) {
+                primerError = elemento;
+            }
+            
+            // Si es seguridad social, asegurarnos de que el contenedor sea visible
+            if (campo.id === 'seguridad_social') {
+                const seguridadSocialSection = document.querySelector('.seguridad-social-section');
+                if (seguridadSocialSection) {
+                    primerError = seguridadSocialSection;
+                }
+            }
         } else if (campo.id === 'telefono' && elemento.value.length !== 10) {
-            // Validación específica para teléfono
             mostrarError(elemento, 'El teléfono debe tener exactamente 10 dígitos');
             isValid = false;
+            if (!primerError) primerError = elemento;
         }
     });
 
@@ -715,6 +812,7 @@ function validarFormulario() {
         if (!experiencia.value) {
             mostrarError(experiencia, 'Por favor ingresa tus años de experiencia');
             isValid = false;
+            if (!primerError) primerError = experiencia;
         }
         
         if (categoria === 'arquitecto') {
@@ -722,8 +820,29 @@ function validarFormulario() {
             if (!software.value) {
                 mostrarError(software, 'Por favor ingresa el software que manejas');
                 isValid = false;
+                if (!primerError) primerError = software;
             }
         }
+    }
+
+    // Validar campos específicos según el rol
+    if (categoria === 'tecnico' || categoria === 'instalador') {
+        const especialidadesSection = document.querySelector('.especialidades-section');
+        const especialidadesSeleccionadas = document.querySelectorAll('.especialidad-card.selected');
+        if (especialidadesSeleccionadas.length === 0) {
+            mostrarError(especialidadesSection, 'Por favor selecciona al menos una especialidad');
+            isValid = false;
+            if (!primerError) primerError = especialidadesSection;
+        }
+    }
+
+    // Si hay errores, hacer scroll al primer error
+    if (primerError) {
+        primerError.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+        });
     }
 
     return isValid;
@@ -742,42 +861,48 @@ function mostrarError(elemento, mensaje) {
     }
 }
 
-// Actualizar la función de manejo del formulario
+function validarRedesSociales() {
+    const instagramInput = document.querySelector('input[name="instagram-user"]');
+    const facebookInput = document.querySelector('input[name="facebook-user"]');
+    const whatsappInput = document.querySelector('input[name="whatsapp-number"]');
+
+    if (instagramInput.value && !/^[A-Za-z0-9._]{1,30}$/.test(instagramInput.value)) {
+        mostrarError(instagramInput, 'Usuario de Instagram inválido');
+        return false;
+    }
+
+    if (facebookInput.value && !/^[A-Za-z0-9._\s]{1,50}$/.test(facebookInput.value)) {
+        mostrarError(facebookInput, 'Usuario de Facebook inválido');
+        return false;
+    }
+
+    if (whatsappInput.value && !/^[0-9]{10}$/.test(whatsappInput.value)) {
+        mostrarError(whatsappInput, 'Número de WhatsApp inválido');
+        return false;
+    }
+
+    return true;
+}
+
+// Actualizar manejarEnvioFormulario para incluir esta validación
 async function manejarEnvioFormulario(e) {
     e.preventDefault();
     
-    if (!validarFormulario()) {
+    if (!validarFormulario() || !validarRedesSociales()) {
         return;
     }
-
-    // Obtener todos los valores necesarios
-    const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-    const genero = document.getElementById('genero').value;
-    const categoria = document.getElementById('categoria').value;
-
-    // Validaciones iniciales con mensajes más claros
-    if (!fechaNacimiento) {
-        alert('Por favor selecciona tu fecha de nacimiento');
-        return;
-    }
-
-    if (!genero) {
-        alert('Por favor selecciona tu género');
-        document.querySelector('.gender-container').scrollIntoView({ behavior: 'smooth' });
-        return;
-    }
-
-    // Log de verificación
-    console.log('Valores antes de enviar:', {
-        fechaNacimiento,
-        genero,
-        categoria
-    });
 
     try {
-        // Preparar datos base con los nombres de campos correctos
+        // Obtener valores de redes sociales
+        const instagramUser = document.querySelector('input[name="instagram-user"]')?.value || null;
+        const facebookUser = document.querySelector('input[name="facebook-user"]')?.value || null;
+        const whatsappCheckbox = document.getElementById('same-whatsapp');
+        const whatsappNumber = whatsappCheckbox.checked ? 
+            document.getElementById('telefono').value : 
+            document.querySelector('input[name="whatsapp-number"]')?.value || null;
+
         const datosBase = {
-            rol: categoria,
+            rol: document.getElementById('categoria').value,
             tipo_documento: document.getElementById('tipoDocumento').value,
             numero_documento: document.getElementById('numeroDocumento').value,
             nombre: document.getElementById('nombre').value,
@@ -788,14 +913,20 @@ async function manejarEnvioFormulario(e) {
             departamento: document.getElementById('departamento').value,
             municipio: document.getElementById('municipio').value,
             disponibilidad: document.getElementById('disponibilidad').value,
-            fechanacimiento: fechaNacimiento, 
-            genero: genero,
+            fechanacimiento: document.getElementById('fechaNacimiento').value,
+            genero: document.getElementById('genero').value,
+            // Agregar redes sociales
+            instagram_user: instagramUser,
+            facebook_user: facebookUser,
+            whatsapp_number: whatsappNumber,
+            seguridad_social: document.getElementById('seguridad_social').value
         };
 
-        // Log de verificación de los datos base
-        console.log('Datos base a enviar:', datosBase);
+        // Log para debugging
+        console.log('Datos a enviar:', datosBase);
 
         // Añadir datos específicos según el rol
+        const categoria = document.getElementById('categoria').value;
         if (categoria === 'arquitecto' || categoria === 'siso') {
             Object.assign(datosBase, {
                 experiencia: document.getElementById('experiencia').value,
@@ -806,33 +937,43 @@ async function manejarEnvioFormulario(e) {
             Object.assign(datosBase, especialidades);
         }
 
-        // Log final de todos los datos
-        console.log('Datos completos a enviar:', datosBase);
-
-        // Enviar al worker
+        // Enviar al worker con manejo de errores mejorado
         const response = await fetch('https://workers-playground-soft-butterfly-c2c6.calidad.workers.dev', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify(datosBase)
         });
 
+        // Log de la respuesta para debugging
+        const responseData = await response.text();
+        console.log('Respuesta del servidor:', {
+            status: response.status,
+            statusText: response.statusText,
+            data: responseData
+        });
+
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error completo:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
-            throw new Error(errorText);
+            throw new Error(`Error del servidor: ${response.status} - ${responseData}`);
         }
 
-        mostrarMensajeExito();
+        // Intentar parsear la respuesta como JSON
+        try {
+            const jsonResponse = JSON.parse(responseData);
+            if (jsonResponse.success) {
+                mostrarMensajeExito();
+            } else {
+                throw new Error(jsonResponse.message || 'Error desconocido');
+            }
+        } catch (parseError) {
+            throw new Error(`Error al procesar la respuesta: ${responseData}`);
+        }
 
     } catch (error) {
         console.error('Error detallado:', error);
-        alert('Error al enviar el formulario: ' + error.message);
+        alert(`Error al enviar el formulario: ${error.message}`);
     }
 }
 
@@ -846,6 +987,7 @@ function obtenerEspecialidadesDetalladas() {
         enchapado: false,
         instalacion_cocinas: false,
         instalacion_pisos: false,
+        mamposteria: false,
         drywall_superboard_experiencia: null,
         pintura_acabados_experiencia: null,
         electricidad_experiencia: null,
@@ -853,10 +995,10 @@ function obtenerEspecialidadesDetalladas() {
         carpinteria_experiencia: null,
         enchapado_experiencia: null,
         instalacion_cocinas_experiencia: null,
-        instalacion_pisos_experiencia: null
+        instalacion_pisos_experiencia: null,
+        mamposteria_experiencia: null
     };
 
-    // Mantener el mapeo dentro de la función
     const mappings = {
         'Drywall / Superboard': 'drywall_superboard',
         'Pintura y Acabados': 'pintura_acabados',
@@ -865,7 +1007,8 @@ function obtenerEspecialidadesDetalladas() {
         'Carpintería': 'carpinteria',
         'Enchapado': 'enchapado',
         'Instalación de Cocinas': 'instalacion_cocinas',
-        'Instalación de Pisos': 'instalacion_pisos'
+        'Instalación de Pisos': 'instalacion_pisos',
+        'Mampostería': 'mamposteria'
     };
 
     document.querySelectorAll('.especialidad-card').forEach(card => {
@@ -1159,37 +1302,21 @@ function initWhatsAppLogic() {
     const whatsappInput = whatsappCard.querySelector('.whatsapp-input');
     const whatsappNumberInput = whatsappInput.querySelector('input[name="whatsapp-number"]');
     
-    // Asegurarse de que el input esté visible por defecto
-    whatsappInput.classList.remove('hidden');
-    
     checkbox.addEventListener('change', function() {
         if (this.checked) {
-            // Guardar el valor actual antes de ocultarlo
-            whatsappNumberInput.dataset.previousValue = whatsappNumberInput.value;
-            
-            // Obtener y usar el número de teléfono principal
             const mainPhone = document.getElementById('telefono').value;
             whatsappNumberInput.value = mainPhone;
-            
-            // Ocultar el campo con transición suave
+            whatsappNumberInput.setAttribute('readonly', true);
             whatsappInput.classList.add('hidden');
         } else {
-            // Mostrar el campo con transición suave
+            whatsappNumberInput.value = whatsappNumberInput.dataset.previousValue || '';
+            whatsappNumberInput.removeAttribute('readonly');
             whatsappInput.classList.remove('hidden');
-            
-            // Restaurar el valor previo si existía
-            setTimeout(() => {
-                if (whatsappNumberInput.dataset.previousValue) {
-                    whatsappNumberInput.value = whatsappNumberInput.dataset.previousValue;
-                } else {
-                    whatsappNumberInput.value = '';
-                }
-            }, 50); // Pequeño retraso para que la transición sea más suave
         }
     });
 
-    // Actualizar el valor de WhatsApp cuando cambie el teléfono principal
-    document.getElementById('telefono').addEventListener('change', function() {
+    // Mantener sincronizado con el teléfono principal
+    document.getElementById('telefono').addEventListener('input', function() {
         if (checkbox.checked) {
             whatsappNumberInput.value = this.value;
         }
@@ -1232,3 +1359,21 @@ function initSocialCards() {
 
 // Asegurarse de que se inicialice cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', initSocialCards);
+
+function initSeguridadSocial() {
+    const optionCards = document.querySelectorAll('.seguridad-social-options .option-card');
+    const hiddenInput = document.getElementById('seguridad_social');
+    
+    optionCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remover selección previa
+            optionCards.forEach(c => c.classList.remove('selected'));
+            
+            // Seleccionar la nueva opción
+            this.classList.add('selected');
+            
+            // Actualizar el valor del input oculto
+            hiddenInput.value = this.dataset.value;
+        });
+    });
+}
